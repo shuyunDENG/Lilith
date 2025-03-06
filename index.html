@@ -106,9 +106,30 @@
   <script>
     // 不同语言的"自由"以及融化相关词汇
     const freedomWords = [
-      '自由', 'freedom', 'liberté', 'Freiheit', 'libertad', 
-      'свобода', '자유', '自由', '消解', '融化', 'dissolve', 'melt'
-    ];
+  '自由','freedom',   
+  'liberté',       
+  'Freiheit',      
+  'libertad',       
+  'свобода',        // 俄语
+  '자유',           // 韩语
+  'libertà',        // 意大利语
+  'vrijheid',       // 荷兰语
+  'svoboda',        // 捷克语
+  'szabadság',      // 匈牙利语
+  'sloboda',        // 斯洛伐克语
+  'frihed',         // 丹麦语
+  'vapaus',         // 芬兰语
+  'frihet',         // 瑞典语
+  'λευτεριά',       // 希腊语
+  'حرية',           /
+  'स्वतंत्रता',     
+  'özgürlük',       
+  '自由',          
+  'เสรีภาพ',       
+  'स्वाधीनता',     
+  'bekebasan',      
+  'sloboda',        
+];
     
     // 产生混乱的文字碎片
     const chaosFragments = [
@@ -133,7 +154,7 @@
       if (textGenerationInterval) clearInterval(textGenerationInterval);
       
       // 设置初始值
-      generationSpeed = 5;
+      generationSpeed = 7;
       totalTextsCreated = 0;
       
       // 创建间隔函数，持续生成文字
@@ -241,14 +262,6 @@
         easing: 'easeInOutSine'
       });
       
-      // 延迟隐藏主文本
-      anime({
-        targets: '#main-text',
-        opacity: 0,
-        duration: 5000,
-        easing: 'easeInOutQuad'
-      });
-      
       // 延迟显示TV扫描线效果
       setTimeout(() => {
         document.querySelector('.tv-scan-effect').style.opacity = '0.7';
@@ -353,11 +366,11 @@
       phase += 0.005; // 减小到0.005（原来是0.01）
       
       // 渐进加深红色背景 - 减少透明度使变化更慢
-      ctx.fillStyle = 'rgba(178, 34, 34, 0.02)'; // 减小到0.02（原来是0.05）
+      ctx.fillStyle = 'rgba(178, 34, 34, 0.05)'; // 减小到0.02（原来是0.05）
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // 绘制电视扫描线 - 延迟显示
-      if (phase > 15) { // 增加到15（原来是8）以延迟扫描线出现
+      if (phase > 10) { // 增加到15（原来是8）以延迟扫描线出现
         const scanLines = Math.floor(canvas.height / tvLineHeight);
         
         for (let i = 0; i < scanLines; i++) {
@@ -461,8 +474,8 @@
                 clone.style.fontWeight = 'bold';
                 
                 // 初始克隆集中在中心区域
-                clone.style.top = (40 + Math.random() * 20) + 'vh';
-                clone.style.left = (40 + Math.random() * 20) + 'vw';
+                clone.style.top = Math.random() * 100 + 'vh'
+                clone.style.left = Math.random() * 100 + 'vw';
                 
                 clone.style.transform = `rotate(${Math.random() * 360}deg)`;
                 document.body.appendChild(clone);
