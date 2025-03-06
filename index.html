@@ -12,10 +12,13 @@
     }
     .free-clone {
       position: absolute;
-      font-size: 1.5rem;
+      font-size: 4rem;
       font-weight: bold;
       color: #8B0000;
       opacity: 0;
+      filter: blur(2px);
+      pointer-events: none;
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -39,21 +42,26 @@
   </div>
 
   <script>
+    const words = ['freedom', 'liberté', 'Freiheit', '자유', '自由', 'حرية', 'свобода'];
+
     function createFreedomClones() {
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 200; i++) {
         const clone = document.createElement('div');
         clone.className = 'free-clone';
-        clone.innerText = '自由';
+        clone.innerText = words[Math.floor(Math.random() * words.length)];
         clone.style.top = Math.random() * 100 + 'vh';
         clone.style.left = Math.random() * 100 + 'vw';
+        clone.style.transform = `rotate(${Math.random() * 360}deg)`;
+        clone.style.fontSize = (Math.random() * 3 + 3) + 'rem';
+        clone.style.opacity = Math.random() * 0.5 + 0.3;
         document.body.appendChild(clone);
 
         anime({
           targets: clone,
-          opacity: [0, 1],
-          scale: [0.5, 1.2],
-          duration: 2000,
-          delay: i * 100,
+          opacity: [0, clone.style.opacity],
+          scale: [0.5, 1.5],
+          duration: 3000,
+          delay: i * 50,
           easing: 'easeOutExpo'
         });
       }
