@@ -7,12 +7,15 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
   <style>
-    @keyframes breathe {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.9; }
+    body {
+      overflow: hidden;
     }
-    .breathe {
-      animation: breathe 3s infinite ease-in-out;
+    .free-clone {
+      position: absolute;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #8B0000;
+      opacity: 0;
     }
   </style>
 </head>
@@ -26,7 +29,7 @@
         <span id="wo" class="inline-block font-bold">我</span>
         <span id="fang" class="inline-block font-bold">放</span>
         <span id="zhu" class="inline-block font-bold">逐</span>
-        <span id="freedom" class="absolute inset-0 hidden text-[#8B0000] flex justify-center space-x-4 text-3xl breathe">
+        <span id="freedom" class="absolute inset-0 hidden text-[#8B0000] text-3xl font-bold flex justify-center space-x-4">
           <span>自</span>
           <span>由</span>
         </span>
@@ -36,25 +39,50 @@
   </div>
 
   <script>
+    function createFreedomClones() {
+      for (let i = 0; i < 30; i++) {
+        const clone = document.createElement('div');
+        clone.className = 'free-clone';
+        clone.innerText = '自由';
+        clone.style.top = Math.random() * 100 + 'vh';
+        clone.style.left = Math.random() * 100 + 'vw';
+        document.body.appendChild(clone);
+
+        anime({
+          targets: clone,
+          opacity: [0, 1],
+          scale: [0.5, 1.2],
+          duration: 2000,
+          delay: i * 100,
+          easing: 'easeOutExpo'
+        });
+      }
+    }
+
     window.onload = () => {
       anime.timeline()
         .add({
           targets: ['#ziwo', '#wo', '#fang', '#zhu'],
-          translateY: [-10, -50],
+          translateX: () => anime.random(-100, 100),
+          translateY: () => anime.random(-100, 100),
           opacity: [1, 0],
           delay: anime.stagger(200),
-          duration: 1000,
+          duration: 1200,
           easing: 'easeInOutQuad'
         })
         .add({
           targets: '#freedom',
           opacity: [0, 1],
           scale: [0.8, 1],
-          duration: 800,
+          duration: 1000,
           easing: 'easeOutBack',
           begin: () => {
             document.getElementById('freedom').classList.remove('hidden');
           }
+        })
+        .add({
+          duration: 500,
+          complete: createFreedomClones
         });
     };
   </script>
