@@ -261,6 +261,14 @@
         loop: true,
         easing: 'easeInOutSine'
       });
+
+      // 延迟隐藏主文本
+      anime({
+        targets: '#main-text',
+        opacity: 0,
+        duration: 5000,
+        easing: 'easeInOutQuad'
+      });
       
       // 延迟显示TV扫描线效果
       setTimeout(() => {
