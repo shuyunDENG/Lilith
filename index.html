@@ -122,64 +122,107 @@
     let chaosMode = false;
     let canvas, ctx;
     
-    // 创建自由文字克隆 - 使用预创建和一次性动画方式
-    function createFreedomClones(count, delay, isInitial = false) {
-      // 预先创建所有元素
-      const fragments = [];
+    // 持续生成文字的函数
+    let generationSpeed = 5; // 初始每次生成的数量
+    let maxTexts = 2000; // 文字总上限，防止性能问题
+    let totalTextsCreated = 0;
+    let textGenerationInterval;
+    
+    function startContinuousTextGeneration() {
+      // 清除之前可能的间隔
+      if (textGenerationInterval) clearInterval(textGenerationInterval);
       
+      // 设置初始值
+      generationSpeed = 5;
+      totalTextsCreated = 0;
+      
+      // 创建间隔函数，持续生成文字
+      textGenerationInterval = setInterval(() => {
+        // 递增生成速度，使文字越来越多
+        generationSpeed += 0.5;
+        
+        // 生成新一批文字
+        createBatchOfTexts(Math.floor(generationSpeed));
+        
+        // 检查是否达到上限
+        if (totalTextsCreated > maxTexts) {
+          clearInterval(textGenerationInterval);
+          console.log("已达到文字生成上限");
+        }
+      }, 200); // 每200毫秒运行一次
+    }
+    
+    // 生成一批文字
+    function createBatchOfTexts(count) {
       for (let i = 0; i < count; i++) {
-        const clone = document.createElement('div');
-        clone.className = 'free-clone';
-        const word = freedomWords[Math.floor(Math.random() * freedomWords.length)];
-        clone.innerText = word;
+        // 如果超过上限则停止
+        if (totalTextsCreated >= maxTexts) return;
         
-        // 清晰的字体样式
-        clone.style.fontSize = (Math.random() * 3 + 2) + 'rem';
-        clone.style.fontWeight = 'bold';
+        // 随机选择创建自由词或碎片词
+        const isFreeTerm = Math.random() > 0.3;
         
-        // 均匀分布在屏幕上
-        if (isInitial) {
-          // 初始克隆集中在中心区域
-          clone.style.top = (40 + Math.random() * 20) + 'vh';
-          clone.style.left = (40 + Math.random() * 20) + 'vw';
+        if (isFreeTerm) {
+          createSingleFreedomText();
         } else {
-          clone.style.top = Math.random() * 100 + 'vh';
-          clone.style.left = Math.random() * 100 + 'vw';
+          createSingleFragmentText();
         }
         
-        clone.style.transform = `rotate(${Math.random() * 360}deg)`;
-        document.body.appendChild(clone);
-        fragments.push(clone);
+        totalTextsCreated++;
       }
+    }
+    
+    // 创建单个自由词
+    function createSingleFreedomText() {
+      const clone = document.createElement('div');
+      clone.className = 'free-clone';
+      const word = freedomWords[Math.floor(Math.random() * freedomWords.length)];
+      clone.innerText = word;
       
-      // 然后一次性为所有元素添加动画
+      // 字体样式
+      clone.style.fontSize = (Math.random() * 3 + 2) + 'rem';
+      clone.style.fontWeight = 'bold';
+      
+      // 随机位置
+      clone.style.top = Math.random() * 100 + 'vh';
+      clone.style.left = Math.random() * 100 + 'vw';
+      clone.style.transform = `rotate(${Math.random() * 360}deg)`;
+      clone.style.opacity = '0'; // 初始透明
+      document.body.appendChild(clone);
+      
+      // 直接应用动画
       anime({
-        targets: fragments,
-        opacity: [0, (el, i) => Math.random() * 0.3 + 0.7], // 更高不透明度
-        scale: [0.5, (el, i) => 1 + Math.random()],
+        targets: clone,
+        opacity: [0, Math.random() * 0.3 + 0.7],
+        scale: [0.5, 1 + Math.random()],
         duration: 1000,
-        delay: anime.stagger(5, {
-          from: isInitial ? 'center' : 'random',
-          start: delay
-        }), // 快速、连续的出现
-        easing: 'easeOutExpo',
-        complete: function() {
-          if (chaosMode) {
-            // 如果想停在图二状态，可以注释掉下面的融化效果代码
-            /*
-            // 混沌模式：持续移动并逐渐融化
-            anime({
-              targets: fragments,
-              translateY: 300, // 向下融化
-              opacity: [1, 0],
-              scale: (el, i) => 0.8 + Math.random() * 1.5,
-              duration: (el, i) => 10000 + Math.random() * 5000,
-              delay: anime.stagger(100, {from: 'random'}),
-              easing: 'easeInQuad'
-            });
-            */
-          }
-        }
+        easing: 'easeOutExpo'
+      });
+    }
+    
+    // 创建单个碎片词
+    function createSingleFragmentText() {
+      const fragment = document.createElement('div');
+      fragment.className = 'freedom-fragment';
+      fragment.innerText = chaosFragments[Math.floor(Math.random() * chaosFragments.length)];
+      
+      // 字体样式
+      fragment.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
+      fragment.style.color = `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.6})`;
+      fragment.style.fontWeight = 'bold';
+      
+      // 随机位置
+      fragment.style.top = Math.random() * 100 + 'vh';
+      fragment.style.left = Math.random() * 100 + 'vw';
+      fragment.style.opacity = '0'; // 初始透明
+      document.body.appendChild(fragment);
+      
+      // 直接应用动画
+      anime({
+        targets: fragment,
+        opacity: [0, Math.random() * 0.8 + 0.2],
+        scale: [0, 1],
+        duration: 1000,
+        easing: 'easeOutExpo'
       });
     }
     
@@ -192,7 +235,7 @@
       anime({
         targets: 'body',
         backgroundColor: ['#FF3232', '#B22222', '#FF0000', '#D70000'],
-        duration: 4000, // 增加到4000（原来是2000）
+        duration: 4000,
         direction: 'alternate',
         loop: true,
         easing: 'easeInOutSine'
@@ -202,25 +245,22 @@
       anime({
         targets: '#main-text',
         opacity: 0,
-        duration: 5000, // 增加到5000（原来是3000）
+        duration: 5000,
         easing: 'easeInOutQuad'
       });
       
       // 延迟显示TV扫描线效果
       setTimeout(() => {
         document.querySelector('.tv-scan-effect').style.opacity = '0.7';
-      }, 12000); // 增加到12000（原来是5000）
+      }, 12000);
       
-      // 创建更多自由克隆 - 可以调整数量
-      createFreedomClones(200, 0); // 减少到200（原来是300）
+      // 启动连续文字生成
+      startContinuousTextGeneration();
       
       // 延迟启动Canvas效果
       setTimeout(() => {
         canvas.style.opacity = 1;
-      }, 5000); // 添加延迟
-      
-      // 创建文字碎片
-      createTextFragments();
+      }, 5000);
     }
     
     // 创建文字碎片 - 使用预创建和一次性动画方法
@@ -406,8 +446,40 @@
         .add({
           duration: 500,
           complete: () => {
-            // 创建第一波自由文字
-            createFreedomClones(50, 0, true);
+            // 创建第一波自由文字 - 使用旧方法创建初始文字
+            // 创建初始文字的函数(防止命名冲突)
+            function createInitialFreedomTexts(count) {
+              const fragments = [];
+              
+              for (let i = 0; i < count; i++) {
+                const clone = document.createElement('div');
+                clone.className = 'free-clone';
+                const word = freedomWords[Math.floor(Math.random() * freedomWords.length)];
+                clone.innerText = word;
+                
+                clone.style.fontSize = (Math.random() * 3 + 2) + 'rem';
+                clone.style.fontWeight = 'bold';
+                
+                // 初始克隆集中在中心区域
+                clone.style.top = (40 + Math.random() * 20) + 'vh';
+                clone.style.left = (40 + Math.random() * 20) + 'vw';
+                
+                clone.style.transform = `rotate(${Math.random() * 360}deg)`;
+                document.body.appendChild(clone);
+                fragments.push(clone);
+              }
+              
+              anime({
+                targets: fragments,
+                opacity: [0, (el, i) => Math.random() * 0.3 + 0.7],
+                scale: [0.5, (el, i) => 1 + Math.random()],
+                duration: 1000,
+                delay: anime.stagger(5, {from: 'center', start: 0}),
+                easing: 'easeOutExpo'
+              });
+            }
+            
+            createInitialFreedomTexts(50);
             
             // 文本抖动效果
             const mainText = document.getElementById('main-text');
@@ -421,13 +493,8 @@
               loop: 2
             });
             
-            // 8秒后再添加一波自由文字（延长初始黑色文字显示时间）
-            setTimeout(() => {
-              createFreedomClones(100, 0);
-              
-              // 10秒后进入混沌模式（给更多时间展示图一状态）
-              setTimeout(createChaosEffect, 10000);
-            }, 8000);
+            // 8秒后进入混沌模式（延长初始黑色文字显示时间）
+            setTimeout(createChaosEffect, 8000);
           }
         });
     };
