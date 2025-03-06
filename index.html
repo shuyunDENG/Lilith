@@ -5,13 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lilith</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 </head>
 <body class="bg-white flex items-center justify-center min-h-screen">
   <div class="text-center px-4">
     <h1 class="text-2xl md:text-4xl font-serif text-black leading-relaxed">
       莉莉丝因为不满亚当的命令式语气而主动离开了伊甸园，<br>
-      此举被上帝判定为「自我放逐」。
+      此举被上帝判定为「
+      <span id="word-container" class="inline-block relative">
+        <span id="ziwo" class="inline-block">自</span>
+        <span id="wo" class="inline-block">我</span>
+        <span id="fang" class="inline-block">放</span>
+        <span id="zhu" class="inline-block">逐</span>
+        <span id="freedom" class="absolute inset-0 hidden text-red-500">自由</span>
+      </span>
+      」。
     </h1>
   </div>
+
+  <script>
+    window.onload = () => {
+      anime.timeline()
+        .add({
+          targets: ['#ziwo', '#wo', '#fang', '#zhu'],
+          translateY: [-10, -50],
+          opacity: [1, 0],
+          delay: anime.stagger(200),
+          duration: 1000,
+          easing: 'easeInOutQuad'
+        })
+        .add({
+          targets: '#freedom',
+          opacity: [0, 1],
+          scale: [0.8, 1],
+          duration: 800,
+          easing: 'easeOutBack',
+          begin: () => {
+            document.getElementById('freedom').classList.remove('hidden');
+          }
+        });
+    };
+  </script>
 </body>
 </html>
