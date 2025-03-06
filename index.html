@@ -124,6 +124,9 @@
     
     // 创建自由文字克隆
     function createFreedomClones(count, delay, isInitial = false) {
+      // 控制文字出现速度 - 这个值越大，出现越慢
+      const cloneDelayMultiplier = 50; // 增加到50（原来是30）
+      
       for (let i = 0; i < count; i++) {
         const clone = document.createElement('div');
         clone.className = 'free-clone';
@@ -146,10 +149,12 @@
           opacity: [0, Math.random() * 0.3 + 0.7], // 更高不透明度
           scale: [0.5, 1 + Math.random()],
           duration: 2000 + Math.random() * 1000,
-          delay: delay + i * 30,
+          delay: delay + i * cloneDelayMultiplier, // 控制速度的关键参数
           easing: 'easeOutExpo',
           complete: function() {
             if (chaosMode) {
+              // 如果想停在图二状态，可以注释掉下面的融化效果代码
+              /*
               // 混沌模式：持续移动并逐渐融化
               anime({
                 targets: clone,
@@ -160,6 +165,7 @@
                 delay: Math.random() * 5000,
                 easing: 'easeInQuad'
               });
+              */
             }
           }
         });
@@ -171,34 +177,36 @@
       chaosMode = true;
       document.body.style.backgroundColor = "#FF3232";
       
-      // 创建震动效果
+      // 创建更缓慢的红色震动效果
       anime({
         targets: 'body',
         backgroundColor: ['#FF3232', '#B22222', '#FF0000', '#D70000'],
-        duration: 2000,
+        duration: 4000, // 增加到4000（原来是2000）
         direction: 'alternate',
         loop: true,
         easing: 'easeInOutSine'
       });
       
-      // 隐藏主文本
+      // 延迟隐藏主文本
       anime({
         targets: '#main-text',
         opacity: 0,
-        duration: 3000,
+        duration: 5000, // 增加到5000（原来是3000）
         easing: 'easeInOutQuad'
       });
       
-      // 显示TV扫描线效果
+      // 延迟显示TV扫描线效果
       setTimeout(() => {
         document.querySelector('.tv-scan-effect').style.opacity = '0.7';
-      }, 5000);
+      }, 12000); // 增加到12000（原来是5000）
       
-      // 创建更多自由克隆
-      createFreedomClones(300, 0);
+      // 创建更多自由克隆 - 可以调整数量
+      createFreedomClones(200, 0); // 减少到200（原来是300）
       
-      // 启动Canvas效果
-      canvas.style.opacity = 1;
+      // 延迟启动Canvas效果
+      setTimeout(() => {
+        canvas.style.opacity = 1;
+      }, 5000); // 添加延迟
       
       // 创建文字碎片
       createTextFragments();
@@ -208,6 +216,9 @@
     function createTextFragments() {
       const cols = 20;
       const rows = 15;
+      
+      // 控制整体出现速度 - 这个值越大，字符铺满屏幕越慢
+      const delayBetweenChars = 60; // 增加到60（原来是20）
       
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
@@ -226,16 +237,18 @@
           
           document.body.appendChild(fragment);
           
-          // 显示动画
+          // 显示动画 - 这里的delay控制字符出现的节奏
           anime({
             targets: fragment,
             opacity: [0, Math.random() * 0.8 + 0.2],
             scale: [0, 1],
             duration: 2000,
-            delay: (i * cols + j) * 20,
+            delay: (i * cols + j) * delayBetweenChars, // 控制速度的关键参数
             easing: 'easeOutExpo',
             complete: function() {
-              // 融化效果
+              // 如果想停在图二状态，可以注释掉下面的融化效果代码
+              /* 
+              // 融化效果 - 如果要停在图二，注释这段即可
               setTimeout(() => {
                 anime({
                   targets: fragment,
@@ -245,7 +258,8 @@
                   easing: 'easeInQuad',
                   delay: Math.random() * 3000
                 });
-              }, 8000 + Math.random() * 5000);
+              }, 15000 + Math.random() * 5000);
+              */
             }
           });
         }
@@ -279,14 +293,15 @@
         return;
       }
       
-      phase += 0.01;
+      // 减慢相位变化速度 - 这会减慢动画整体速度
+      phase += 0.005; // 减小到0.005（原来是0.01）
       
-      // 渐进加深红色背景
-      ctx.fillStyle = 'rgba(178, 34, 34, 0.05)';
+      // 渐进加深红色背景 - 减少透明度使变化更慢
+      ctx.fillStyle = 'rgba(178, 34, 34, 0.02)'; // 减小到0.02（原来是0.05）
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // 绘制电视扫描线
-      if (phase > 8) { // 在一段时间后开始显示扫描线
+      // 绘制电视扫描线 - 延迟显示
+      if (phase > 15) { // 增加到15（原来是8）以延迟扫描线出现
         const scanLines = Math.floor(canvas.height / tvLineHeight);
         
         for (let i = 0; i < scanLines; i++) {
@@ -306,7 +321,9 @@
           }
         }
         
-        // 文字融化效果 - 偶尔添加滴落的红色
+        // 文字融化效果 - 如果要停在图二状态，可以注释掉下面这段
+        /*
+        // 偶尔添加滴落的红色
         if (Math.random() > 0.95) {
           for (let i = 0; i < 3; i++) {
             const x = Math.random() * canvas.width;
@@ -330,6 +347,7 @@
             ctx.stroke();
           }
         }
+        */
       }
       
       requestAnimationFrame(drawTVLines);
@@ -387,13 +405,13 @@
               loop: 2
             });
             
-            // 3秒后再添加一波自由文字
+            // 8秒后再添加一波自由文字（延长初始黑色文字显示时间）
             setTimeout(() => {
               createFreedomClones(100, 0);
               
-              // 6秒后进入混沌模式
-              setTimeout(createChaosEffect, 6000);
-            }, 3000);
+              // 10秒后进入混沌模式（给更多时间展示图一状态）
+              setTimeout(createChaosEffect, 10000);
+            }, 8000);
           }
         });
     };
