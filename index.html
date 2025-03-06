@@ -107,7 +107,7 @@
     // 不同语言的"自由"以及融化相关词汇
     const freedomWords = [
       '自由', 'freedom', 'liberté', 'Freiheit', 'libertad', 
-      'свобода', '자유', '自由', 'dissolve', 'melt'
+      'свобода', '자유', '自由', '消解', '融化', 'dissolve', 'melt'
     ];
     
     // 产生混乱的文字碎片
@@ -122,10 +122,10 @@
     let chaosMode = false;
     let canvas, ctx;
     
-    // 创建自由文字克隆
+    // 创建自由文字克隆 - 使用预创建和一次性动画方式
     function createFreedomClones(count, delay, isInitial = false) {
-      // 控制文字出现速度 - 这个值越大，出现越慢
-      const cloneDelayMultiplier = 10; // 增加到50（原来是30）
+      // 预先创建所有元素
+      const fragments = [];
       
       for (let i = 0; i < count; i++) {
         const clone = document.createElement('div');
@@ -138,38 +138,49 @@
         clone.style.fontWeight = 'bold';
         
         // 均匀分布在屏幕上
-        clone.style.top = Math.random() * 100 + 'vh';
-        clone.style.left = Math.random() * 100 + 'vw';
+        if (isInitial) {
+          // 初始克隆集中在中心区域
+          clone.style.top = (40 + Math.random() * 20) + 'vh';
+          clone.style.left = (40 + Math.random() * 20) + 'vw';
+        } else {
+          clone.style.top = Math.random() * 100 + 'vh';
+          clone.style.left = Math.random() * 100 + 'vw';
+        }
+        
         clone.style.transform = `rotate(${Math.random() * 360}deg)`;
         document.body.appendChild(clone);
-        
-        // 动画效果
-        anime({
-          targets: clone,
-          opacity: [0, Math.random() * 0.3 + 0.7], // 更高不透明度
-          scale: [0.5, 1 + Math.random()],
-          duration: 2000 + Math.random() * 1000,
-          delay: delay + i * cloneDelayMultiplier, // 控制速度的关键参数
-          easing: 'easeOutExpo',
-          complete: function() {
-            if (chaosMode) {
-              // 如果想停在图二状态，可以注释掉下面的融化效果代码
-              /*
-              // 混沌模式：持续移动并逐渐融化
-              anime({
-                targets: clone,
-                translateY: 300, // 向下融化
-                opacity: [1, 0],
-                scale: () => 0.8 + Math.random() * 1.5,
-                duration: 10000 + Math.random() * 8000,
-                delay: Math.random() * 5000,
-                easing: 'easeInQuad'
-              });
-              */
-            }
-          }
-        });
+        fragments.push(clone);
       }
+      
+      // 然后一次性为所有元素添加动画
+      anime({
+        targets: fragments,
+        opacity: [0, (el, i) => Math.random() * 0.3 + 0.7], // 更高不透明度
+        scale: [0.5, (el, i) => 1 + Math.random()],
+        duration: 1000,
+        delay: anime.stagger(5, {
+          from: isInitial ? 'center' : 'random',
+          start: delay
+        }), // 快速、连续的出现
+        easing: 'easeOutExpo',
+        complete: function() {
+          if (chaosMode) {
+            // 如果想停在图二状态，可以注释掉下面的融化效果代码
+            /*
+            // 混沌模式：持续移动并逐渐融化
+            anime({
+              targets: fragments,
+              translateY: 300, // 向下融化
+              opacity: [1, 0],
+              scale: (el, i) => 0.8 + Math.random() * 1.5,
+              duration: (el, i) => 10000 + Math.random() * 5000,
+              delay: anime.stagger(100, {from: 'random'}),
+              easing: 'easeInQuad'
+            });
+            */
+          }
+        }
+      });
     }
     
     // 创建混沌效果
@@ -201,7 +212,7 @@
       }, 12000); // 增加到12000（原来是5000）
       
       // 创建更多自由克隆 - 可以调整数量
-      createFreedomClones(600, 0); // 减少到200（原来是300）
+      createFreedomClones(200, 0); // 减少到200（原来是300）
       
       // 延迟启动Canvas效果
       setTimeout(() => {
@@ -212,13 +223,14 @@
       createTextFragments();
     }
     
-    // 创建文字碎片 - 排列成类似电视像素的样式
+    // 创建文字碎片 - 使用预创建和一次性动画方法
     function createTextFragments() {
-      const cols = 20;
-      const rows = 15;
+      // 增加密度 - 更多列和行
+      const cols = 30;
+      const rows = 25;
       
-      // 控制整体出现速度 - 这个值越大，字符铺满屏幕越慢
-      const delayBetweenChars = 5; // 增加到60（原来是20）
+      // 预先创建所有元素
+      const fragments = [];
       
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
@@ -231,39 +243,43 @@
           fragment.style.color = `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.6})`;
           fragment.style.fontWeight = 'bold';
           
-          // 排列成网格
+          // 排列成网格，但有轻微随机偏移以避免过于规则
           fragment.style.top = `${(i * 100 / rows) + Math.random() * 3}vh`;
           fragment.style.left = `${(j * 100 / cols) + Math.random() * 3}vw`;
           
           document.body.appendChild(fragment);
-          
-          // 显示动画 - 这里的delay控制字符出现的节奏
-          anime({
-            targets: fragment,
-            opacity: [0, Math.random() * 0.8 + 0.2],
-            scale: [0, 1],
-            duration: 2000,
-            delay: (i * cols + j) * delayBetweenChars, // 控制速度的关键参数
-            easing: 'easeOutExpo',
-            complete: function() {
-              // 如果想停在图二状态，可以注释掉下面的融化效果代码
-              /* 
-              // 融化效果 - 如果要停在图二，注释这段即可
-              setTimeout(() => {
-                anime({
-                  targets: fragment,
-                  translateY: 100, // 向下融化
-                  opacity: 0,
-                  duration: 7000 + Math.random() * 3000,
-                  easing: 'easeInQuad',
-                  delay: Math.random() * 3000
-                });
-              }, 15000 + Math.random() * 5000);
-              */
-            }
-          });
+          fragments.push(fragment);
         }
       }
+      
+      // 然后一次性为所有元素添加动画
+      anime({
+        targets: fragments,
+        opacity: [0, (el, i) => Math.random() * 0.8 + 0.2],
+        scale: [0, 1],
+        duration: 1500,
+        delay: anime.stagger(3, {
+          grid: [cols, rows],
+          from: 'center'
+        }), // 从中心向外，非常快速地出现
+        easing: 'easeOutExpo',
+        complete: function() {
+          // 如果想停在图二状态，可以注释掉下面的融化效果代码
+          /* 
+          // 融化效果 - 如果要停在图二，注释这段即可
+          setTimeout(() => {
+            anime({
+              targets: fragments,
+              translateY: 100, // 向下融化
+              opacity: 0,
+              duration: (el, i) => 7000 + Math.random() * 3000,
+              delay: anime.stagger(100, {from: 'top'}),
+              easing: 'easeInQuad'
+            });
+          }, 15000);
+          */
+        }
+      });
     }
     
     // 初始化Canvas
