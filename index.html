@@ -6,6 +6,15 @@
   <title>Lilith</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <style>
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    .breathe {
+      animation: breathe 3s infinite ease-in-out;
+    }
+  </style>
 </head>
 <body class="bg-white flex items-center justify-center min-h-screen">
   <div class="text-center px-4">
@@ -13,11 +22,14 @@
       莉莉丝因为不满亚当的命令式语气而主动离开了伊甸园，<br>
       此举被上帝判定为「
       <span id="word-container" class="inline-block relative">
-        <span id="ziwo" class="inline-block">自</span>
-        <span id="wo" class="inline-block">我</span>
-        <span id="fang" class="inline-block">放</span>
-        <span id="zhu" class="inline-block">逐</span>
-        <span id="freedom" class="absolute inset-0 hidden text-red-500">自由</span>
+        <span id="ziwo" class="inline-block font-bold">自</span>
+        <span id="wo" class="inline-block font-bold">我</span>
+        <span id="fang" class="inline-block font-bold">放</span>
+        <span id="zhu" class="inline-block font-bold">逐</span>
+        <span id="freedom" class="absolute inset-0 hidden text-[#8B0000] flex justify-center space-x-4 text-3xl breathe">
+          <span>自</span>
+          <span>由</span>
+        </span>
       </span>
       」。
     </h1>
