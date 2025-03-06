@@ -47,49 +47,9 @@
       pointer-events: none;
       white-space: nowrap;
       z-index: 5;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     }
     
-    .glitch-text {
-      position: relative;
-      display: inline-block;
-      color: black;
-    }
-    
-    .glitch-text::before,
-    .glitch-text::after {
-      content: attr(data-text);
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-    }
-    
-    .glitch-text::before {
-      color: #ff00ff;
-      z-index: -1;
-    }
-    
-    .glitch-text::after {
-      color: #00ffff;
-      z-index: -2;
-    }
-    
-    #chaos-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      opacity: 0;
-      transition: opacity 5s;
-      pointer-events: none;
-    }
-    
-    /* 扫描线效果 */
+    /* TV扫描线效果 */
     .tv-scan-effect {
       position: fixed;
       top: 0;
@@ -110,49 +70,6 @@
     @keyframes scanline {
       0% { transform: translateY(0); }
       100% { transform: translateY(4px); }
-    }
-    
-    /* 老电视噪点 */
-    .tv-noise {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 15;
-      opacity: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E");
-    }
-    
-    /* 融化效果 */
-    .melting-layer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 10;
-      opacity: 0;
-      background: linear-gradient(to bottom,
-        rgba(255, 0, 0, 0) 0%,
-        rgba(255, 0, 0, 0.05) 20%,
-        rgba(255, 0, 0, 0.1) 40%,
-        rgba(255, 0, 0, 0.2) 60%,
-        rgba(255, 0, 0, 0.3) 80%,
-        rgba(255, 0, 0, 0.4) 100%
-      );
-    }
-    
-    .freedom-path {
-      position: absolute;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: rgba(139, 0, 0, 0.8);
-      white-space: nowrap;
-      z-index: 4;
-      pointer-events: none;
     }
     
     .freedom-fragment {
@@ -184,39 +101,25 @@
   </div>
   
   <div class="tv-scan-effect"></div>
-  <div class="tv-noise"></div>
-  <div class="melting-layer"></div>
   <canvas id="chaos-canvas"></canvas>
   
   <script>
-    // 不同语言的"自由" - 添加更多与融化/消解相关的词汇
+    // 不同语言的"自由"以及融化相关词汇
     const freedomWords = [
       '自由', 'freedom', 'liberté', 'Freiheit', 'libertad', 
-      'свобода', 'الحرية', '자유', 'frihet', 'özgürlük', 
-      'liberdade', 'libero', 'vrijheid', 'wolność',
-      'laisvė', 'brīvība', 'swoboda', 'ազատություն',
-      'szabadság', 'સ્વતંત્રતા', 'स्वतंत्रता', 'ελευθερία',
-      '消解', '融化', '溶解', '瓦解', '分离', '离散', '崩溃',
-      'melt', 'dissolve', 'fragment', 'disrupt', 'entropy',
-      'chaos', 'decode', 'vanish', 'scatter', 'dissipate'
+      'свобода', '자유', '自由', '消解', '融化', 'dissolve', 'melt'
     ];
     
     // 产生混乱的文字碎片
     const chaosFragments = [
       '无', '限', '解', '放', '脱', '束', '缚', '极', 
       '端', '混', '沌', '虚', '无', '破', '灭', '碎', 
-      '空', '散', '消', '逝', '泯', '溃', '失', '坠',
-      '∞', '†', '§', '¶', '×', '÷', '√', '∆', 'Ω',
-      '◊', '⊕', '⊗', '⊥', '∀', '∃', '∄', '∅', '∈',
-      '∉', '∋', '∌', '∏', '∑', '∝', '∞', '∠', '∧',
-      '∨', '∩', '∪', '∴', '∵', '∷', '∼', '≅', '≈'
+      '空', '散', '消', '逝', '∞', '√', '×', '÷'
     ];
     
     // 主动画时间线
     let mainAnimation;
     let chaosMode = false;
-    let vortexInterval;
-    let freedomPathsInterval;
     let canvas, ctx;
     
     // 创建自由文字克隆
@@ -227,51 +130,35 @@
         const word = freedomWords[Math.floor(Math.random() * freedomWords.length)];
         clone.innerText = word;
         
-        // 为文字添加更清晰的样式
+        // 清晰的字体样式
         clone.style.fontSize = (Math.random() * 3 + 2) + 'rem';
         clone.style.fontWeight = 'bold';
-        clone.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.5)';
         
-        // 初始位置更集中，后续更分散
-        if (isInitial) {
-          clone.style.top = (40 + Math.random() * 20) + 'vh';
-          clone.style.left = (40 + Math.random() * 20) + 'vw';
-        } else {
-          clone.style.top = Math.random() * 100 + 'vh';
-          clone.style.left = Math.random() * 100 + 'vw';
-        }
-        
+        // 均匀分布在屏幕上
+        clone.style.top = Math.random() * 100 + 'vh';
+        clone.style.left = Math.random() * 100 + 'vw';
         clone.style.transform = `rotate(${Math.random() * 360}deg)`;
         document.body.appendChild(clone);
         
         // 动画效果
         anime({
           targets: clone,
-          opacity: [0, Math.random() * 0.3 + 0.7], // 更高不透明度，更清晰
+          opacity: [0, Math.random() * 0.3 + 0.7], // 更高不透明度
           scale: [0.5, 1 + Math.random()],
           duration: 2000 + Math.random() * 1000,
           delay: delay + i * 30,
           easing: 'easeOutExpo',
           complete: function() {
             if (chaosMode) {
-              // 混沌模式：持续移动并添加震动效果
+              // 混沌模式：持续移动并逐渐融化
               anime({
                 targets: clone,
-                translateX: () => anime.random(-window.innerWidth/2, window.innerWidth/2),
-                translateY: () => anime.random(-window.innerHeight/2, window.innerHeight/2),
-                rotate: () => anime.random(-180, 180),
-                scale: () => 0.8 + Math.random() * 1.5, // 确保文字大小足够清晰
-                duration: 8000 + Math.random() * 5000,
-                easing: 'easeInOutSine',
-                direction: 'alternate',
-                loop: true,
-                update: function(anim) {
-                  // 在动画过程中添加轻微震动
-                  if (Math.random() > 0.9) {
-                    const currentTransform = clone.style.transform || '';
-                    clone.style.transform = currentTransform + ` translate(${Math.random() * 8 - 4}px, ${Math.random() * 8 - 4}px)`;
-                  }
-                }
+                translateY: 300, // 向下融化
+                opacity: [1, 0],
+                scale: () => 0.8 + Math.random() * 1.5,
+                duration: 10000 + Math.random() * 8000,
+                delay: Math.random() * 5000,
+                easing: 'easeInQuad'
               });
             }
           }
@@ -302,187 +189,67 @@
         easing: 'easeInOutQuad'
       });
       
-      // 激活老电视效果
-      const scanEffect = document.querySelector('.tv-scan-effect');
-      const tvNoise = document.querySelector('.tv-noise');
-      const meltingLayer = document.querySelector('.melting-layer');
-      
-      // 逐渐显示扫描线效果
+      // 显示TV扫描线效果
       setTimeout(() => {
-        scanEffect.style.opacity = '0.5';
-        // 添加间歇性的信号干扰效果
-        setInterval(() => {
-          if (Math.random() > 0.7) {
-            scanEffect.style.opacity = '0.8';
-            setTimeout(() => {
-              scanEffect.style.opacity = '0.5';
-            }, 100);
-          }
-        }, 2000);
-      }, 4000);
-      
-      // 逐渐显示噪点效果
-      setTimeout(() => {
-        tvNoise.style.opacity = '1';
-        // 添加噪点闪烁
-        anime({
-          targets: tvNoise,
-          opacity: [1, 0.3, 1],
-          duration: 1000,
-          easing: 'easeInOutSine',
-          direction: 'alternate',
-          loop: true
-        });
+        document.querySelector('.tv-scan-effect').style.opacity = '0.7';
       }, 5000);
-      
-      // 显示融化效果
-      setTimeout(() => {
-        meltingLayer.style.opacity = '1';
-        // 制造融化效果的动态感
-        anime({
-          targets: meltingLayer,
-          opacity: [1, 0.7, 1],
-          backgroundPositionY: [0, 10, 0],
-          duration: 3000,
-          easing: 'easeInOutSine',
-          direction: 'alternate',
-          loop: true
-        });
-      }, 6000);
       
       // 创建更多自由克隆
       createFreedomClones(300, 0);
       
-      // 开始混沌Canvas动画
+      // 启动Canvas效果
       canvas.style.opacity = 1;
-      
-      // 创建自由文字路径
-      startFreedomPaths();
       
       // 创建文字碎片
       createTextFragments();
     }
     
-    // 创建文字碎片 - 让它们看起来更像是静态电视噪点
+    // 创建文字碎片 - 排列成类似电视像素的样式
     function createTextFragments() {
-      for (let i = 0; i < 200; i++) {
-        setTimeout(() => {
+      const cols = 20;
+      const rows = 15;
+      
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
           const fragment = document.createElement('div');
           fragment.className = 'freedom-fragment';
           fragment.innerText = chaosFragments[Math.floor(Math.random() * chaosFragments.length)];
           
-          // 使字体大小更加多变
-          fragment.style.fontSize = (Math.random() * 3 + 0.8) + 'rem';
-          
-          // 字体颜色在红色和白色之间变化
-          const isWhite = Math.random() > 0.6;
-          if (isWhite) {
-            fragment.style.color = `rgba(255, 255, 255, ${Math.random() * 0.3 + 0.7})`;
-          } else {
-            const redIntensity = 150 + Math.floor(Math.random() * 105);
-            fragment.style.color = `rgba(${redIntensity}, ${Math.floor(redIntensity/8)}, ${Math.floor(redIntensity/8)}, ${Math.random() * 0.4 + 0.6})`;
-          }
-          
+          // 清晰的像素化文字
+          fragment.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
+          fragment.style.color = `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.6})`;
           fragment.style.fontWeight = 'bold';
           
-          // 均匀分布在屏幕上
-          const row = Math.floor(i / 20);
-          const col = i % 20;
-          fragment.style.top = `${(row * 5) + Math.random() * 4}vh`;
-          fragment.style.left = `${(col * 5) + Math.random() * 4}vw`;
+          // 排列成网格
+          fragment.style.top = `${(i * 100 / rows) + Math.random() * 3}vh`;
+          fragment.style.left = `${(j * 100 / cols) + Math.random() * 3}vw`;
           
-          fragment.style.textShadow = '1px 1px 3px rgba(0, 0, 0, 0.5)';
           document.body.appendChild(fragment);
           
-          // 初始动画
+          // 显示动画
           anime({
             targets: fragment,
             opacity: [0, Math.random() * 0.8 + 0.2],
-            translateX: () => anime.random(-20, 20),
-            translateY: () => anime.random(-20, 20),
-            scale: [0, 1 + Math.random() * 0.5],
+            scale: [0, 1],
             duration: 2000,
+            delay: (i * cols + j) * 20,
             easing: 'easeOutExpo',
             complete: function() {
-              // 模拟电视屏幕干扰效果
-              anime({
-                targets: fragment,
-                opacity: () => [0.2 + Math.random() * 0.6, 0.1, 0.2 + Math.random() * 0.6],
-                translateX: () => anime.random(-10, 10),
-                translateY: () => anime.random(-5, 5),
-                scale: () => 0.8 + Math.random() * 0.4,
-                duration: 300 + Math.random() * 200,
-                easing: 'steps(2)',
-                loop: true
-              });
-              
-              // 添加文字融化效果 - 一定时间后文字开始向下融化
+              // 融化效果
               setTimeout(() => {
-                if (document.body.contains(fragment)) {
-                  anime({
-                    targets: fragment,
-                    translateY: 300, // 向下融化
-                    opacity: 0,
-                    filter: 'blur(3px)',
-                    duration: 5000 + Math.random() * 3000,
-                    easing: 'easeInQuad',
-                    delay: Math.random() * 2000
-                  });
-                }
-              }, 10000 + Math.random() * 5000);
+                anime({
+                  targets: fragment,
+                  translateY: 100, // 向下融化
+                  opacity: 0,
+                  duration: 7000 + Math.random() * 3000,
+                  easing: 'easeInQuad',
+                  delay: Math.random() * 3000
+                });
+              }, 8000 + Math.random() * 5000);
             }
           });
-        }, i * 50);
+        }
       }
-    }
-    
-    // 创建自由文字路径
-    function startFreedomPaths() {
-      freedomPathsInterval = setInterval(() => {
-        const path = document.createElement('div');
-        path.className = 'freedom-path';
-        
-        // 随机选择一个自由单词
-        const word = freedomWords[Math.floor(Math.random() * freedomWords.length)];
-        const repeatedWord = word.repeat(20); // 重复单词形成路径
-        path.innerText = repeatedWord;
-        
-        // 设置清晰的样式
-        path.style.color = 'white';
-        path.style.fontWeight = 'bold';
-        path.style.textShadow = '1px 1px 3px rgba(0, 0, 0, 0.5)';
-        path.style.fontSize = (Math.random() * 0.5 + 1.2) + 'rem';
-        
-        // 随机路径位置和旋转
-        const startAngle = Math.random() * Math.PI * 2;
-        const distance = Math.max(window.innerWidth, window.innerHeight) * 0.8;
-        const startX = window.innerWidth / 2 + Math.cos(startAngle) * distance;
-        const startY = window.innerHeight / 2 + Math.sin(startAngle) * distance;
-        
-        path.style.top = startY + 'px';
-        path.style.left = startX + 'px';
-        path.style.transform = `rotate(${Math.random() * 360}deg)`;
-        document.body.appendChild(path);
-        
-        // 动画：向中心移动，添加震动效果
-        anime({
-          targets: path,
-          translateX: [0, (window.innerWidth / 2 - startX) * 1.2],
-          translateY: [0, (window.innerHeight / 2 - startY) * 1.2],
-          opacity: [0, 0.9, 0],
-          easing: 'easeInOutSine',
-          duration: 8000,
-          update: function(anim) {
-            // 添加轻微震动
-            if (anim.progress > 20 && anim.progress < 80) {
-              path.style.transform = `rotate(${Math.random() * 360}deg) translate(${Math.random() * 6 - 3}px, ${Math.random() * 6 - 3}px)`;
-            }
-          },
-          complete: function() {
-            document.body.removeChild(path);
-          }
-        });
-      }, 600);
     }
     
     // 初始化Canvas
@@ -490,123 +257,83 @@
       canvas = document.getElementById('chaos-canvas');
       ctx = canvas.getContext('2d');
       
-      // 设置Canvas尺寸
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      canvas.style.opacity = 0;
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.zIndex = '1';
       
-      // 开始绘制混沌线条
-      requestAnimationFrame(drawChaos);
+      // 开始绘制红色扫描线效果
+      requestAnimationFrame(drawTVLines);
     }
     
-    // 绘制电视扫描线和融化线条
+    // 绘制电视扫描线效果
     let phase = 0;
-    let tvMode = false; // 控制何时切换到电视效果
-    let tvLineHeight = 2; // 电视线高度
+    let tvLineHeight = 4;
     
-    function drawChaos() {
+    function drawTVLines() {
       if (!chaosMode) {
-        requestAnimationFrame(drawChaos);
+        requestAnimationFrame(drawTVLines);
         return;
       }
       
       phase += 0.01;
       
-      if (!tvMode && phase > 5) {
-        tvMode = true;
-        // 清屏一次，准备切换到电视线效果
-        ctx.fillStyle = 'rgba(178, 34, 34, 0.2)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
+      // 渐进加深红色背景
+      ctx.fillStyle = 'rgba(178, 34, 34, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      if (!tvMode) {
-        // 初始混沌阶段
-        ctx.fillStyle = 'rgba(178, 34, 34, 0.05)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // 绘制混沌线条
-        for (let i = 0; i < 5; i++) {
-          // 红色系色调
-          const redShade = Math.floor(Math.random() * 55) + 200;
-          ctx.strokeStyle = `rgba(${redShade}, ${Math.floor(redShade/6)}, ${Math.floor(redShade/6)}, 0.4)`;
-          ctx.lineWidth = 1.5 + Math.random() * 2.5;
-      } else {
-        // 电视线效果阶段
-        ctx.fillStyle = 'rgba(178, 34, 34, 0.05)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // 画水平扫描线
+      // 绘制电视扫描线
+      if (phase > 8) { // 在一段时间后开始显示扫描线
         const scanLines = Math.floor(canvas.height / tvLineHeight);
+        
         for (let i = 0; i < scanLines; i++) {
-          // 偶数行亮一些，奇数行暗一些，模拟电视扫描线
           if (i % 2 === 0) {
+            // 随机亮度的红色扫描线
             const brightness = 200 + Math.random() * 55;
-            const yPos = i * tvLineHeight + (phase * 10) % tvLineHeight;
+            const yPos = i * tvLineHeight;
             
             ctx.fillStyle = `rgba(${brightness}, ${Math.floor(brightness/8)}, ${Math.floor(brightness/8)}, ${0.3 + Math.random() * 0.2})`;
             ctx.fillRect(0, yPos, canvas.width, tvLineHeight / 2);
             
-            // 随机添加一些干扰
+            // 偶尔添加水平干扰线
             if (Math.random() > 0.99) {
-              const glitchWidth = Math.random() * canvas.width / 4;
-              const glitchX = Math.random() * (canvas.width - glitchWidth);
-              ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
-              ctx.fillRect(glitchX, yPos, glitchWidth, tvLineHeight * 2);
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+              ctx.fillRect(0, Math.random() * canvas.height, canvas.width, 2 + Math.random() * 3);
             }
           }
         }
         
-        ctx.        ctx.beginPath();
-        
-        // 创建混沌曲线
-        let x = Math.random() * canvas.width;
-        let y = Math.random() * canvas.height;
-        ctx.moveTo(x, y);
-        
-        for (let j = 0; j < 20; j++) {
-          const angle = phase + j * 0.2 + Math.sin(phase + j * 0.5) * 2;
-          const length = Math.random() * 50 + 20;
-          x += Math.cos(angle) * length;
-          y += Math.sin(angle) * length;
-          ctx.lineTo(x, y);
-        }
-        
-        ctx.stroke();
-      }
-      
-      // 文字融化效果
-      if (phase > 6 && phase < 10) {
-        // 随机在屏幕上滴落红色的"墨水"
-        for (let i = 0; i < 3; i++) {
-          const x = Math.random() * canvas.width;
-          const startY = Math.random() * (canvas.height / 3);
-          const length = 20 + Math.random() * 100;
-          
-          ctx.beginPath();
-          ctx.moveTo(x, startY);
-          
-          let currentY = startY;
-          let currentX = x;
-          
-          // 绘制下滴路径
-          while (currentY < startY + length) {
-            currentY += 1 + Math.random() * 3;
-            currentX += Math.random() * 4 - 2;
-            ctx.lineTo(currentX, currentY);
+        // 文字融化效果 - 偶尔添加滴落的红色
+        if (Math.random() > 0.95) {
+          for (let i = 0; i < 3; i++) {
+            const x = Math.random() * canvas.width;
+            const startY = Math.random() * (canvas.height / 3);
+            const length = 20 + Math.random() * 100;
+            
+            ctx.beginPath();
+            ctx.moveTo(x, startY);
+            
+            let currentY = startY;
+            let currentX = x;
+            
+            while (currentY < startY + length) {
+              currentY += 1 + Math.random() * 3;
+              currentX += Math.random() * 4 - 2;
+              ctx.lineTo(currentX, currentY);
+            }
+            
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
+            ctx.lineWidth = 1 + Math.random() * 3;
+            ctx.stroke();
           }
-          
-          // 使用红色渐变
-          const gradient = ctx.createLinearGradient(x, startY, x, currentY);
-          gradient.addColorStop(0, 'rgba(255, 0, 0, 0.7)');
-          gradient.addColorStop(1, 'rgba(180, 0, 0, 0.2)');
-          
-          ctx.strokeStyle = gradient;
-          ctx.lineWidth = 1 + Math.random() * 3;
-          ctx.stroke();
         }
       }
       
-      requestAnimationFrame(drawChaos);
-    }}
+      requestAnimationFrame(drawTVLines);
+    }
     
     // 窗口大小调整
     window.addEventListener('resize', function() {
@@ -615,58 +342,6 @@
         canvas.height = window.innerHeight;
       }
     });
-    
-    // 添加电视机干扰效果
-    function addTVInterference() {
-      // 随机闪烁整个屏幕
-      if (Math.random() > 0.95) {
-        const flash = document.createElement('div');
-        flash.style.position = 'fixed';
-        flash.style.top = '0';
-        flash.style.left = '0';
-        flash.style.width = '100%';
-        flash.style.height = '100%';
-        flash.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-        flash.style.zIndex = '30';
-        flash.style.pointerEvents = 'none';
-        document.body.appendChild(flash);
-        
-        setTimeout(() => {
-          document.body.removeChild(flash);
-        }, 50 + Math.random() * 100);
-      }
-      
-      // 水平干扰线
-      if (Math.random() > 0.9) {
-        const line = document.createElement('div');
-        line.style.position = 'fixed';
-        line.style.left = '0';
-        line.style.width = '100%';
-        line.style.height = (2 + Math.random() * 5) + 'px';
-        line.style.top = (Math.random() * 100) + 'vh';
-        line.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-        line.style.zIndex = '25';
-        line.style.pointerEvents = 'none';
-        line.style.transform = `translateY(${Math.random() * 10 - 5}px)`;
-        document.body.appendChild(line);
-        
-        // 添加干扰线的动画
-        anime({
-          targets: line,
-          translateX: [-20, window.innerWidth + 20],
-          opacity: [0.8, 0],
-          easing: 'linear',
-          duration: 100 + Math.random() * 200,
-          complete: function() {
-            document.body.removeChild(line);
-          }
-        });
-      }
-      
-      if (chaosMode) {
-        requestAnimationFrame(addTVInterference);
-      }
-    }
     
     // 页面加载
     window.onload = function() {
@@ -700,7 +375,7 @@
             // 创建第一波自由文字
             createFreedomClones(50, 0, true);
             
-            // 为文本添加抖动效果
+            // 文本抖动效果
             const mainText = document.getElementById('main-text');
             anime({
               targets: mainText,
@@ -716,49 +391,8 @@
             setTimeout(() => {
               createFreedomClones(100, 0);
               
-              // 文本扭曲效果
-              const words = document.querySelectorAll('#freedom span');
-              words.forEach(word => {
-                word.dataset.text = word.innerText;
-                word.classList.add('glitch-text');
-                
-                anime({
-                  targets: word,
-                  skewX: [0, 10, -10, 0],
-                  skewY: [0, -5, 5, 0],
-                  duration: 2000,
-                  easing: 'easeInOutSine',
-                  loop: 2
-                });
-              });
-              
               // 6秒后进入混沌模式
-              setTimeout(() => {
-                createChaosEffect();
-                // 启动电视机干扰效果
-                addTVInterference();
-                
-                // 12秒后启动文字融化转变为电视线的最终效果
-                setTimeout(() => {
-                  // 让所有文字逐渐消失，融入背景
-                  anime({
-                    targets: '.free-clone, .freedom-fragment, .freedom-path',
-                    opacity: 0,
-                    translateY: 200,
-                    filter: 'blur(8px)',
-                    duration: 5000,
-                    easing: 'easeInQuad',
-                    delay: anime.stagger(50),
-                  });
-                  
-                  // 增强TV扫描线效果
-                  const scanEffect = document.querySelector('.tv-scan-effect');
-                  scanEffect.style.opacity = '0.8';
-                  
-                  // 增加电视机扫描线的线数和强度
-                  tvLineHeight = 4; // 增加扫描线密度
-                }, 12000);
-              }, 6000);
+              setTimeout(createChaosEffect, 6000);
             }, 3000);
           }
         });
