@@ -107,7 +107,7 @@
     // 不同语言的"自由"以及融化相关词汇
     const freedomWords = [
       '自由', 'freedom', 'liberté', 'Freiheit', 'libertad', 
-      'свобода', '자유', '自由', '消解', '融化', 'dissolve', 'melt'
+      'свобода', '자유', '自由', 'dissolve', 'melt'
     ];
     
     // 产生混乱的文字碎片
@@ -125,7 +125,7 @@
     // 创建自由文字克隆
     function createFreedomClones(count, delay, isInitial = false) {
       // 控制文字出现速度 - 这个值越大，出现越慢
-      const cloneDelayMultiplier = 50; // 增加到50（原来是30）
+      const cloneDelayMultiplier = 10; // 增加到50（原来是30）
       
       for (let i = 0; i < count; i++) {
         const clone = document.createElement('div');
@@ -201,7 +201,7 @@
       }, 12000); // 增加到12000（原来是5000）
       
       // 创建更多自由克隆 - 可以调整数量
-      createFreedomClones(200, 0); // 减少到200（原来是300）
+      createFreedomClones(600, 0); // 减少到200（原来是300）
       
       // 延迟启动Canvas效果
       setTimeout(() => {
@@ -218,7 +218,7 @@
       const rows = 15;
       
       // 控制整体出现速度 - 这个值越大，字符铺满屏幕越慢
-      const delayBetweenChars = 60; // 增加到60（原来是20）
+      const delayBetweenChars = 5; // 增加到60（原来是20）
       
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
