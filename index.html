@@ -49,7 +49,7 @@
       z-index: 5;
     }
     
-    /* TV扫描线效果 */
+    /* TV scan line effect */
     .tv-scan-effect {
       position: fixed;
       top: 0;
@@ -79,6 +79,34 @@
       pointer-events: none;
       z-index: 2;
     }
+
+    /* Additional styles for word-container and freedom spans */
+    .inline-block {
+      display: inline-block;
+    }
+    
+    .relative {
+      position: relative;
+    }
+    
+    .absolute {
+      position: absolute;
+    }
+    
+    .inset-0 {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+    
+    .font-bold {
+      font-weight: bold;
+    }
+    
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -91,7 +119,7 @@
         <span id="wo" class="inline-block font-bold">我</span>
         <span id="fang" class="inline-block font-bold">放</span>
         <span id="zhu" class="inline-block font-bold">逐</span>
-        <span id="freedom" class="absolute inset-0 hidden" style="display: flex; justify-content: center; color: #8B0000; font-size: 1.5em; font-weight: bold;">
+        <span id="freedom" class="absolute inset-0 hidden" style="justify-content: center; color: #8B0000; font-size: 1.5em; font-weight: bold;">
           <span>自</span>
           <span>由</span>
         </span>
@@ -104,82 +132,82 @@
   <canvas id="chaos-canvas"></canvas>
   
   <script>
-    // 不同语言的"自由"以及融化相关词汇
+    // "Freedom" in different languages and dissolution-related vocabulary
     const freedomWords = [
-  '自由','freedom',   
-  'liberté',       
-  'Freiheit',      
-  'libertad',       
-  'свобода',        // 俄语
-  '자유',           // 韩语
-  'libertà',        // 意大利语
-  'vrijheid',       // 荷兰语
-  'svoboda',        // 捷克语
-  'szabadság',      // 匈牙利语
-  'sloboda',        // 斯洛伐克语
-  'frihed',         // 丹麦语
-  'vapaus',         // 芬兰语
-  'frihet',         // 瑞典语
-  'λευτεριά',       // 希腊语
-  'حرية',           /
-  'स्वतंत्रता',     
-  'özgürlük',       
-  '自由',          
-  'เสรีภาพ',       
-  'स्वाधीनता',     
-  'bekebasan',      
-  'sloboda',        
-];
+      '自由','freedom',   
+      'liberté',       
+      'Freiheit',      
+      'libertad',       
+      'свобода',        // Russian
+      '자유',           // Korean
+      'libertà',        // Italian
+      'vrijheid',       // Dutch
+      'svoboda',        // Czech
+      'szabadság',      // Hungarian
+      'sloboda',        // Slovak
+      'frihed',         // Danish
+      'vapaus',         // Finnish
+      'frihet',         // Swedish
+      'λευτεριά',       // Greek
+      'حرية',           // Arabic
+      'स्वतंत्रता',     // Hindi
+      'özgürlük',       // Turkish
+      '自由',           // Japanese
+      'เสรีภาพ',        // Thai
+      'स्वाधीनता',      // Nepali
+      'bekebasan',      // Indonesian
+      'sloboda',        // Croatian
+    ];
     
-    // 产生混乱的文字碎片
+    // Chaos text fragments
     const chaosFragments = [
       '无', '限', '解', '放', '脱', '束', '缚', '极', 
       '端', '混', '沌', '虚', '无', '破', '灭', '碎', 
       '空', '散', '消', '逝', '∞', '√', '×', '÷'
     ];
     
-    // 主动画时间线
+    // Main animation timeline
     let mainAnimation;
     let chaosMode = false;
     let canvas, ctx;
     
-    // 持续生成文字的函数
-    let generationSpeed = 5; // 初始每次生成的数量
-    let maxTexts = 2000; // 文字总上限，防止性能问题
+    // Continuous text generation function
+    let generationSpeed = 5; // Initial number generated each time
+    let maxTexts = 2000; // Text limit to prevent performance issues
     let totalTextsCreated = 0;
     let textGenerationInterval;
     
     function startContinuousTextGeneration() {
-      // 清除之前可能的间隔
+      // Clear previous interval
       if (textGenerationInterval) clearInterval(textGenerationInterval);
       
-      // 设置初始值
+      // Set initial values
       generationSpeed = 7;
       totalTextsCreated = 0;
       
-      // 创建间隔函数，持续生成文字
+      // Create interval function for continuous text generation
       textGenerationInterval = setInterval(() => {
-        // 递增生成速度，使文字越来越多
+        // Increment generation speed
         generationSpeed += 0.5;
         
-        // 生成新一批文字
+        // Generate new batch of text
         createBatchOfTexts(Math.floor(generationSpeed));
         
-        // 检查是否达到上限
+        // Check if limit reached
         if (totalTextsCreated > maxTexts) {
           clearInterval(textGenerationInterval);
-          console.log("已达到文字生成上限");
+          console.log("Text generation limit reached");
         }
-      }, 200); // 每200毫秒运行一次
+      }, 200); // Run every 200ms
     }
     
-    // 生成一批文字
+    // Generate a batch of text
     function createBatchOfTexts(count) {
       for (let i = 0; i < count; i++) {
-        // 如果超过上限则停止
+        // Stop if over limit
         if (totalTextsCreated >= maxTexts) return;
         
-        // 随机选择创建自由词或碎片词
+        // Randomly choose between freedom word or fragment word
         const isFreeTerm = Math.random() > 0.3;
         
         if (isFreeTerm) {
@@ -192,25 +220,25 @@
       }
     }
     
-    // 创建单个自由词
+    // Create a single freedom word
     function createSingleFreedomText() {
       const clone = document.createElement('div');
       clone.className = 'free-clone';
       const word = freedomWords[Math.floor(Math.random() * freedomWords.length)];
       clone.innerText = word;
       
-      // 字体样式
+      // Font style
       clone.style.fontSize = (Math.random() * 3 + 2) + 'rem';
       clone.style.fontWeight = 'bold';
       
-      // 随机位置
+      // Random position
       clone.style.top = Math.random() * 100 + 'vh';
       clone.style.left = Math.random() * 100 + 'vw';
       clone.style.transform = `rotate(${Math.random() * 360}deg)`;
-      clone.style.opacity = '0'; // 初始透明
+      clone.style.opacity = '0'; // Initially transparent
       document.body.appendChild(clone);
       
-      // 直接应用动画
+      // Apply animation directly
       anime({
         targets: clone,
         opacity: [0, Math.random() * 0.3 + 0.7],
@@ -220,24 +248,24 @@
       });
     }
     
-    // 创建单个碎片词
+    // Create a single fragment word
     function createSingleFragmentText() {
       const fragment = document.createElement('div');
       fragment.className = 'freedom-fragment';
       fragment.innerText = chaosFragments[Math.floor(Math.random() * chaosFragments.length)];
       
-      // 字体样式
+      // Font style
       fragment.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
       fragment.style.color = `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.6})`;
       fragment.style.fontWeight = 'bold';
       
-      // 随机位置
+      // Random position
       fragment.style.top = Math.random() * 100 + 'vh';
       fragment.style.left = Math.random() * 100 + 'vw';
-      fragment.style.opacity = '0'; // 初始透明
+      fragment.style.opacity = '0'; // Initially transparent
       document.body.appendChild(fragment);
       
-      // 直接应用动画
+      // Apply animation directly
       anime({
         targets: fragment,
         opacity: [0, Math.random() * 0.8 + 0.2],
@@ -247,12 +275,12 @@
       });
     }
     
-    // 创建混沌效果
+    // Create chaos effect
     function createChaosEffect() {
       chaosMode = true;
       document.body.style.backgroundColor = "#FF3232";
       
-      // 创建更缓慢的红色震动效果
+      // Create slower red pulsating effect
       anime({
         targets: 'body',
         backgroundColor: ['#FF3232', '#B22222', '#FF0000', '#D70000'],
@@ -262,7 +290,7 @@
         easing: 'easeInOutSine'
       });
 
-      // 延迟隐藏主文本
+      // Delayed hiding of main text
       anime({
         targets: '#main-text',
         opacity: 0,
@@ -270,27 +298,27 @@
         easing: 'easeInOutQuad'
       });
       
-      // 延迟显示TV扫描线效果
+      // Delayed display of TV scan line effect
       setTimeout(() => {
         document.querySelector('.tv-scan-effect').style.opacity = '0.7';
       }, 12000);
       
-      // 启动连续文字生成
+      // Start continuous text generation
       startContinuousTextGeneration();
       
-      // 延迟启动Canvas效果
+      // Delayed start of Canvas effect
       setTimeout(() => {
         canvas.style.opacity = 1;
       }, 5000);
     }
     
-    // 创建文字碎片 - 使用预创建和一次性动画方法
+    // Create text fragments - Using pre-creation and one-time animation method
     function createTextFragments() {
-      // 增加密度 - 更多列和行
+      // Increase density - more columns and rows
       const cols = 30;
       const rows = 25;
       
-      // 预先创建所有元素
+      // Pre-create all elements
       const fragments = [];
       
       for (let i = 0; i < rows; i++) {
@@ -299,12 +327,12 @@
           fragment.className = 'freedom-fragment';
           fragment.innerText = chaosFragments[Math.floor(Math.random() * chaosFragments.length)];
           
-          // 清晰的像素化文字
+          // Clear pixelated text
           fragment.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
           fragment.style.color = `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.6})`;
           fragment.style.fontWeight = 'bold';
           
-          // 排列成网格，但有轻微随机偏移以避免过于规则
+          // Arrange in grid with slight random offset
           fragment.style.top = `${(i * 100 / rows) + Math.random() * 3}vh`;
           fragment.style.left = `${(j * 100 / cols) + Math.random() * 3}vw`;
           
@@ -313,7 +341,7 @@
         }
       }
       
-      // 然后一次性为所有元素添加动画
+      // Then create animations for all elements at once
       anime({
         targets: fragments,
         opacity: [0, (el, i) => Math.random() * 0.8 + 0.2],
@@ -322,28 +350,25 @@
         delay: anime.stagger(3, {
           grid: [cols, rows],
           from: 'center'
-        }), // 从中心向外，非常快速地出现
+        }), // Appear very quickly from center outward
         easing: 'easeOutExpo',
         complete: function() {
-          // 如果想停在图二状态，可以注释掉下面的融化效果代码
-          /* 
-          // 融化效果 - 如果要停在图二，注释这段即可
+          // Melting effect - Uncommenting for full animation
           setTimeout(() => {
             anime({
               targets: fragments,
-              translateY: 100, // 向下融化
+              translateY: 100, // Melt downward
               opacity: 0,
               duration: (el, i) => 7000 + Math.random() * 3000,
               delay: anime.stagger(100, {from: 'top'}),
               easing: 'easeInQuad'
             });
           }, 15000);
-          */
         }
       });
     }
     
-    // 初始化Canvas
+    // Initialize Canvas
     function initCanvas() {
       canvas = document.getElementById('chaos-canvas');
       ctx = canvas.getContext('2d');
@@ -356,11 +381,11 @@
       canvas.style.left = '0';
       canvas.style.zIndex = '1';
       
-      // 开始绘制红色扫描线效果
+      // Start drawing red scan lines
       requestAnimationFrame(drawTVLines);
     }
     
-    // 绘制电视扫描线效果
+    // Draw TV scan lines effect
     let phase = 0;
     let tvLineHeight = 4;
     
@@ -370,27 +395,27 @@
         return;
       }
       
-      // 减慢相位变化速度 - 这会减慢动画整体速度
-      phase += 0.005; // 减小到0.005（原来是0.01）
+      // Slow down phase change - slows overall animation
+      phase += 0.005; // Reduced to 0.005 (was 0.01)
       
-      // 渐进加深红色背景 - 减少透明度使变化更慢
-      ctx.fillStyle = 'rgba(178, 34, 34, 0.05)'; // 减小到0.02（原来是0.05）
+      // Gradually deepen red background
+      ctx.fillStyle = 'rgba(178, 34, 34, 0.05)'; // Reduced to 0.05 (was higher)
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // 绘制电视扫描线 - 延迟显示
-      if (phase > 10) { // 增加到15（原来是8）以延迟扫描线出现
+      // Draw TV scan lines - delayed display
+      if (phase > 10) { // Increased to 10 (was 8) to delay scan line appearance
         const scanLines = Math.floor(canvas.height / tvLineHeight);
         
         for (let i = 0; i < scanLines; i++) {
           if (i % 2 === 0) {
-            // 随机亮度的红色扫描线
+            // Random brightness red scan lines
             const brightness = 200 + Math.random() * 55;
             const yPos = i * tvLineHeight;
             
             ctx.fillStyle = `rgba(${brightness}, ${Math.floor(brightness/8)}, ${Math.floor(brightness/8)}, ${0.3 + Math.random() * 0.2})`;
             ctx.fillRect(0, yPos, canvas.width, tvLineHeight / 2);
             
-            // 偶尔添加水平干扰线
+            // Occasionally add horizontal interference lines
             if (Math.random() > 0.99) {
               ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
               ctx.fillRect(0, Math.random() * canvas.height, canvas.width, 2 + Math.random() * 3);
@@ -398,9 +423,8 @@
           }
         }
         
-        // 文字融化效果 - 如果要停在图二状态，可以注释掉下面这段
-        /*
-        // 偶尔添加滴落的红色
+        // Text melting effect - Uncommenting for full animation
+        // Occasionally add dripping red
         if (Math.random() > 0.95) {
           for (let i = 0; i < 3; i++) {
             const x = Math.random() * canvas.width;
@@ -424,13 +448,12 @@
             ctx.stroke();
           }
         }
-        */
       }
       
       requestAnimationFrame(drawTVLines);
     }
     
-    // 窗口大小调整
+    // Window resize
     window.addEventListener('resize', function() {
       if (canvas) {
         canvas.width = window.innerWidth;
@@ -438,12 +461,12 @@
       }
     });
     
-    // 页面加载
+    // Page load
     window.onload = function() {
-      // 初始化Canvas
+      // Initialize Canvas
       initCanvas();
       
-      // 词语散开动画
+      // Words scatter animation
       mainAnimation = anime.timeline()
         .add({
           targets: ['#ziwo', '#wo', '#fang', '#zhu'],
@@ -467,8 +490,7 @@
         .add({
           duration: 500,
           complete: () => {
-            // 创建第一波自由文字 - 使用旧方法创建初始文字
-            // 创建初始文字的函数(防止命名冲突)
+            // Create first wave of freedom text
             function createInitialFreedomTexts(count) {
               const fragments = [];
               
@@ -481,8 +503,8 @@
                 clone.style.fontSize = (Math.random() * 3 + 2) + 'rem';
                 clone.style.fontWeight = 'bold';
                 
-                // 初始克隆集中在中心区域
-                clone.style.top = Math.random() * 100 + 'vh'
+                // Initial clones centered in center area
+                clone.style.top = Math.random() * 100 + 'vh';
                 clone.style.left = Math.random() * 100 + 'vw';
                 
                 clone.style.transform = `rotate(${Math.random() * 360}deg)`;
@@ -502,7 +524,7 @@
             
             createInitialFreedomTexts(50);
             
-            // 文本抖动效果
+            // Text shaking effect
             const mainText = document.getElementById('main-text');
             anime({
               targets: mainText,
@@ -514,7 +536,7 @@
               loop: 2
             });
             
-            // 8秒后进入混沌模式（延长初始黑色文字显示时间）
+            // Enter chaos mode after 8 seconds
             setTimeout(createChaosEffect, 8000);
           }
         });
