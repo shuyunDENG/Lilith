@@ -172,8 +172,8 @@
     let canvas, ctx;
     
     // Continuous text generation function
-    let generationSpeed = 5; // Initial number generated each time
-    let maxTexts = 2000; // Text limit to prevent performance issues
+    let generationSpeed = 15; // Initial number generated each time (increased from 5)
+    let maxTexts = 5000; // Text limit to prevent performance issues (increased from 2000)
     let totalTextsCreated = 0;
     let textGenerationInterval;
     
@@ -182,13 +182,13 @@
       if (textGenerationInterval) clearInterval(textGenerationInterval);
       
       // Set initial values
-      generationSpeed = 7;
+      generationSpeed = 20; // Increased from 7
       totalTextsCreated = 0;
       
       // Create interval function for continuous text generation
       textGenerationInterval = setInterval(() => {
         // Increment generation speed
-        generationSpeed += 0.5;
+        generationSpeed += 1.2; // Increased from 0.5
         
         // Generate new batch of text
         createBatchOfTexts(Math.floor(generationSpeed));
@@ -198,7 +198,7 @@
           clearInterval(textGenerationInterval);
           console.log("Text generation limit reached");
         }
-      }, 200); // Run every 200ms
+      }, 100); // Run every 100ms (reduced from 200ms)
     }
     
     // Generate a batch of text
@@ -315,8 +315,8 @@
     // Create text fragments - Using pre-creation and one-time animation method
     function createTextFragments() {
       // Increase density - more columns and rows
-      const cols = 30;
-      const rows = 25;
+      const cols = 50; // Increased from 30
+      const rows = 40; // Increased from 25
       
       // Pre-create all elements
       const fragments = [];
@@ -346,8 +346,8 @@
         targets: fragments,
         opacity: [0, (el, i) => Math.random() * 0.8 + 0.2],
         scale: [0, 1],
-        duration: 1500,
-        delay: anime.stagger(3, {
+        duration: 800, // Reduced from 1500
+        delay: anime.stagger(1, { // Reduced from 3
           grid: [cols, rows],
           from: 'center'
         }), // Appear very quickly from center outward
@@ -516,13 +516,13 @@
                 targets: fragments,
                 opacity: [0, (el, i) => Math.random() * 0.3 + 0.7],
                 scale: [0.5, (el, i) => 1 + Math.random()],
-                duration: 1000,
-                delay: anime.stagger(5, {from: 'center', start: 0}),
+                duration: 500, // Reduced from 1000ms
+                delay: anime.stagger(2, {from: 'center', start: 0}), // Reduced from 5
                 easing: 'easeOutExpo'
               });
             }
             
-            createInitialFreedomTexts(50);
+            createInitialFreedomTexts(150); // Increased from 50
             
             // Text shaking effect
             const mainText = document.getElementById('main-text');
