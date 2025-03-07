@@ -188,7 +188,7 @@
       // Create interval function for continuous text generation
       textGenerationInterval = setInterval(() => {
         // Increment generation speed
-        generationSpeed += 1.2; // Increased from 0.5
+        generationSpeed += 1.5; // Increased from 0.5
         
         // Generate new batch of text
         createBatchOfTexts(Math.floor(generationSpeed));
@@ -198,7 +198,7 @@
           clearInterval(textGenerationInterval);
           console.log("Text generation limit reached");
         }
-      }, 100); // Run every 100ms (reduced from 200ms)
+      }, 80); // Run every 100ms (reduced from 200ms)
     }
     
     // Generate a batch of text
