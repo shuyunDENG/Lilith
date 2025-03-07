@@ -63,8 +63,8 @@
         transparent 50%, 
         rgba(255, 60, 60, 0.1) 50%
       );
-      background-size: 100% 4px;
-      animation: scanline 0.2s linear infinite;
+      background-size: 100% 3px;
+      animation: scanline 0.1s linear infinite;
     }
     
     @keyframes scanline {
@@ -168,7 +168,7 @@
   <canvas id="chaos-canvas"></canvas>
   
   <!-- Add Enter World Button -->
-  <button id="enter-world-button" class="enter-world-button">Enter the World</button>
+  <button id="enter-world-button" class="enter-world-button">ENTER THE WORLD</button>
   
   <script>
     // "Freedom" in different languages and dissolution-related vocabulary
@@ -479,11 +479,11 @@
       }
       
       // Slow down phase change - slows overall animation
-      phase += 0.005; // Reduced to 0.005 (was 0.01)
+      phase += 0.001; // Reduced to 0.005 (was 0.01)
       
       // Gradually add red background with REDUCED opacity
       // This change allows white text to be more visible by making background less opaque
-      ctx.fillStyle = 'rgba(178, 34, 34, 0.03)'; // Further reduced to 0.03 (was 0.05)
+      ctx.fillStyle = 'rgba(178, 34, 34, 0.01)'; // Further reduced to 0.03 (was 0.05)
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Draw TV scan lines - delayed display
