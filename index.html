@@ -107,6 +107,40 @@
     .hidden {
       display: none;
     }
+    
+    /* Enter World Button */
+    .enter-world-button {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 30px;
+      font-size: 1.5rem;
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 2px solid white;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 100;
+      opacity: 0;
+      transition: all 0.3s ease;
+      font-family: serif;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+    }
+    
+    .enter-world-button:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.9);
+    }
+    
+    /* Glowing effect for chaos fragments */
+    .chaos-fragment-enhanced {
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+      font-weight: bolder;
+      mix-blend-mode: lighten;
+    }
   </style>
 </head>
 <body>
@@ -130,6 +164,9 @@
   
   <div class="tv-scan-effect"></div>
   <canvas id="chaos-canvas"></canvas>
+  
+  <!-- Add Enter World Button -->
+  <button id="enter-world-button" class="enter-world-button">Enter the World</button>
   
   <script>
     // "Freedom" in different languages and dissolution-related vocabulary
@@ -176,6 +213,19 @@
     let maxTexts = 5000; // Text limit to prevent performance issues (increased from 2000)
     let totalTextsCreated = 0;
     let textGenerationInterval;
+    
+    // Set up Enter World button functionality
+    const enterWorldButton = document.getElementById('enter-world-button');
+    
+    enterWorldButton.addEventListener('click', function() {
+      // Handle the button click - for now just alert
+      // In production, this would likely redirect or trigger another action
+      alert('Entering the world... This would connect to another port/system');
+      
+      // Here you would typically redirect or call an external function:
+      // window.location.href = 'destination.html';
+      // or: connectToExternalSystem();
+    });
     
     function startContinuousTextGeneration() {
       // Clear previous interval
@@ -248,15 +298,18 @@
       });
     }
     
-    // Create a single fragment word
+    // Create a single fragment word - ENHANCED for better visibility
     function createSingleFragmentText() {
       const fragment = document.createElement('div');
-      fragment.className = 'freedom-fragment';
+      fragment.className = 'freedom-fragment chaos-fragment-enhanced'; // Added enhanced class
       fragment.innerText = chaosFragments[Math.floor(Math.random() * chaosFragments.length)];
       
-      // Font style
-      fragment.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
-      fragment.style.color = `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.6})`;
+      // Font style - ENHANCED
+      fragment.style.fontSize = (Math.random() * 2 + 1.2) + 'rem'; // Slightly larger
+      
+      // More visible white on red background
+      const whiteness = 220 + Math.floor(Math.random() * 35); // Very bright whites
+      fragment.style.color = `rgb(${whiteness}, ${whiteness}, ${whiteness})`;
       fragment.style.fontWeight = 'bold';
       
       // Random position
@@ -265,11 +318,11 @@
       fragment.style.opacity = '0'; // Initially transparent
       document.body.appendChild(fragment);
       
-      // Apply animation directly
+      // Apply animation directly - ENHANCED
       anime({
         targets: fragment,
-        opacity: [0, Math.random() * 0.8 + 0.2],
-        scale: [0, 1],
+        opacity: [0, Math.random() * 0.8 + 0.4], // Higher minimum opacity
+        scale: [0, 1.2], // Slightly larger scale
         duration: 1000,
         easing: 'easeOutExpo'
       });
@@ -303,6 +356,31 @@
         document.querySelector('.tv-scan-effect').style.opacity = '0.7';
       }, 12000);
       
+      // Fade in the Enter World button after 15 seconds
+      setTimeout(() => {
+        anime({
+          targets: '#enter-world-button',
+          opacity: 1,
+          translateY: [-20, 0],
+          duration: 2000,
+          easing: 'easeOutQuad'
+        });
+        
+        // Add subtle pulsing animation to the button
+        anime({
+          targets: '#enter-world-button',
+          boxShadow: [
+            '0 0 15px rgba(255, 0, 0, 0.7)',
+            '0 0 25px rgba(255, 0, 0, 0.9)',
+            '0 0 15px rgba(255, 0, 0, 0.7)'
+          ],
+          duration: 2000,
+          direction: 'alternate',
+          loop: true,
+          easing: 'easeInOutSine'
+        });
+      }, 15000);
+      
       // Start continuous text generation
       startContinuousTextGeneration();
       
@@ -324,12 +402,15 @@
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
           const fragment = document.createElement('div');
-          fragment.className = 'freedom-fragment';
+          fragment.className = 'freedom-fragment chaos-fragment-enhanced'; // Added enhanced class
           fragment.innerText = chaosFragments[Math.floor(Math.random() * chaosFragments.length)];
           
-          // Clear pixelated text
-          fragment.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
-          fragment.style.color = `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.6})`;
+          // Clear pixelated text - ENHANCED
+          fragment.style.fontSize = (Math.random() * 1.8 + 1) + 'rem'; // Slightly larger
+          
+          // Higher contrast white for better visibility
+          const whiteness = 220 + Math.floor(Math.random() * 35);
+          fragment.style.color = `rgb(${whiteness}, ${whiteness}, ${whiteness})`;
           fragment.style.fontWeight = 'bold';
           
           // Arrange in grid with slight random offset
@@ -344,8 +425,8 @@
       // Then create animations for all elements at once
       anime({
         targets: fragments,
-        opacity: [0, (el, i) => Math.random() * 0.8 + 0.2],
-        scale: [0, 1],
+        opacity: [0, (el, i) => Math.random() * 0.8 + 0.4], // Higher minimum opacity
+        scale: [0, 1.2], // Slightly larger
         duration: 800, // Reduced from 1500
         delay: anime.stagger(1, { // Reduced from 3
           grid: [cols, rows],
@@ -385,7 +466,7 @@
       requestAnimationFrame(drawTVLines);
     }
     
-    // Draw TV scan lines effect
+    // Draw TV scan lines effect - MODIFIED for better white text visibility
     let phase = 0;
     let tvLineHeight = 4;
     
@@ -398,8 +479,9 @@
       // Slow down phase change - slows overall animation
       phase += 0.005; // Reduced to 0.005 (was 0.01)
       
-      // Gradually deepen red background
-      ctx.fillStyle = 'rgba(178, 34, 34, 0.05)'; // Reduced to 0.05 (was higher)
+      // Gradually add red background with REDUCED opacity
+      // This change allows white text to be more visible by making background less opaque
+      ctx.fillStyle = 'rgba(178, 34, 34, 0.03)'; // Further reduced to 0.03 (was 0.05)
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Draw TV scan lines - delayed display
@@ -408,23 +490,24 @@
         
         for (let i = 0; i < scanLines; i++) {
           if (i % 2 === 0) {
-            // Random brightness red scan lines
+            // Random brightness red scan lines with REDUCED opacity
             const brightness = 200 + Math.random() * 55;
             const yPos = i * tvLineHeight;
             
-            ctx.fillStyle = `rgba(${brightness}, ${Math.floor(brightness/8)}, ${Math.floor(brightness/8)}, ${0.3 + Math.random() * 0.2})`;
+            // Reduced scan line opacity to allow white text to show through better
+            ctx.fillStyle = `rgba(${brightness}, ${Math.floor(brightness/8)}, ${Math.floor(brightness/8)}, ${0.2 + Math.random() * 0.15})`;
             ctx.fillRect(0, yPos, canvas.width, tvLineHeight / 2);
             
-            // Occasionally add horizontal interference lines
+            // Occasionally add horizontal interference lines with REDUCED opacity
             if (Math.random() > 0.99) {
-              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'; // Reduced from 0.8
               ctx.fillRect(0, Math.random() * canvas.height, canvas.width, 2 + Math.random() * 3);
             }
           }
         }
         
         // Text melting effect - Uncommenting for full animation
-        // Occasionally add dripping red
+        // Occasionally add dripping red with REDUCED opacity
         if (Math.random() > 0.95) {
           for (let i = 0; i < 3; i++) {
             const x = Math.random() * canvas.width;
@@ -443,7 +526,8 @@
               ctx.lineTo(currentX, currentY);
             }
             
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
+            // Reduced opacity of dripping effect so white text is more visible
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Reduced from 0.7
             ctx.lineWidth = 1 + Math.random() * 3;
             ctx.stroke();
           }
