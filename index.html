@@ -111,28 +111,30 @@
     /* Enter World Button */
     .enter-world-button {
       position: fixed;
-      bottom: 50px;
+      bottom: 50%;
       left: 50%;
       transform: translateX(-50%);
+      transform: translate(-50%, -50%)
       padding: 15px 30px;
-      font-size: 1.5rem;
-      background-color: rgba(255, 255, 255, 0.15);
+      font-size: 0.5rem;
+      background-color: transparent;
       color: white;
-      border: 2px solid white;
+      border: none;
       border-radius: 8px;
       cursor: pointer;
       z-index: 100;
       opacity: 0;
       transition: all 0.3s ease;
       font-family: serif;
-      font-weight: bold;
+      font-weight: normal;
+      letter-spacing: 2px;
       text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
     }
     
     .enter-world-button:hover {
-      background-color: rgba(255, 255, 255, 0.3);
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.9);
+      letter-spacing: 3px;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
     }
     
     /* Glowing effect for chaos fragments */
