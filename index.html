@@ -61,10 +61,10 @@
       opacity: 0;
       background: linear-gradient(
         transparent 50%, 
-        rgba(255, 60, 60, 0.1) 50%
+        rgba(255, 60, 60, 0.25) 50%
       );
       background-size: 100% 3px;
-      animation: scanline 0.1s linear infinite;
+      animation: scanline 0.08s linear infinite;
     }
     
     @keyframes scanline {
@@ -108,32 +108,29 @@
       display: none;
     }
     
-    /* Enter World Button */
+    /* Enter World Button - 修复定位问题和样式 */
     .enter-world-button {
       position: fixed;
-      bottom: 50%;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      transform: translate(-50%, -50%)
-      padding: 15px 30px;
-      font-size: 0.5rem;
+      transform: translate(-50%, -50%);
+      padding: 12px 20px;
+      font-size: 0.8rem;
       background-color: transparent;
       color: white;
       border: none;
-      border-radius: 8px;
       cursor: pointer;
       z-index: 100;
       opacity: 0;
       transition: all 0.3s ease;
       font-family: serif;
       font-weight: normal;
-      letter-spacing: 2px;
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-      box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+      letter-spacing: 3px;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
     }
     
     .enter-world-button:hover {
-      letter-spacing: 3px;
+      letter-spacing: 4px;
       text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
     }
     
@@ -229,6 +226,50 @@
       // or: connectToExternalSystem();
     });
     
+    // 底部涌动效果函数
+    function createBottomSurgeEffect() {
+      setInterval(() => {
+        // 每次创建一批从底部涌出的文字
+        for (let i = 0; i < 10; i++) {
+          const fragment = document.createElement('div');
+          fragment.className = 'freedom-fragment chaos-fragment-enhanced';
+          fragment.innerText = chaosFragments[Math.floor(Math.random() * chaosFragments.length)];
+          
+          fragment.style.fontSize = (Math.random() * 2 + 1.2) + 'rem';
+          fragment.style.color = `rgb(255, 255, 255)`;
+          fragment.style.fontWeight = 'bold';
+          
+          // 从底部开始
+          fragment.style.top = '100vh';
+          fragment.style.left = (Math.random() * 100) + 'vw';
+          fragment.style.opacity = '0';
+          document.body.appendChild(fragment);
+          
+          // 向上涌动动画
+          anime({
+            targets: fragment,
+            opacity: [0, 0.8],
+            translateY: [0, -100 - Math.random() * 200],
+            duration: 3000 + Math.random() * 2000,
+            easing: 'easeOutQuad',
+            complete: function() {
+              // 完成后淡出
+              anime({
+                targets: fragment,
+                opacity: 0,
+                duration: 1000,
+                complete: function() {
+                  if (fragment.parentNode) {
+                    fragment.parentNode.removeChild(fragment);
+                  }
+                }
+              });
+            }
+          });
+        }
+      }, 500); // 每0.5秒产生一批
+    }
+    
     function startContinuousTextGeneration() {
       // Clear previous interval
       if (textGenerationInterval) clearInterval(textGenerationInterval);
@@ -300,7 +341,7 @@
       });
     }
     
-    // Create a single fragment word - ENHANCED for better visibility
+    // Create a single fragment word - 修改为主要在底部区域显示
     function createSingleFragmentText() {
       const fragment = document.createElement('div');
       fragment.className = 'freedom-fragment chaos-fragment-enhanced'; // Added enhanced class
@@ -314,17 +355,23 @@
       fragment.style.color = `rgb(${whiteness}, ${whiteness}, ${whiteness})`;
       fragment.style.fontWeight = 'bold';
       
-      // Random position
-      fragment.style.top = Math.random() * 100 + 'vh';
+      // 修改位置 - 主要在底部区域生成
+      fragment.style.top = (Math.random() * 30 + 70) + 'vh'; // 70%-100% 屏幕高度
       fragment.style.left = Math.random() * 100 + 'vw';
       fragment.style.opacity = '0'; // Initially transparent
       document.body.appendChild(fragment);
       
-      // Apply animation directly - ENHANCED
+      // 添加上下浮动的涌动效果
       anime({
         targets: fragment,
         opacity: [0, Math.random() * 0.8 + 0.4], // Higher minimum opacity
         scale: [0, 1.2], // Slightly larger scale
+        translateY: [
+          {value: -10 + Math.random() * 20, duration: 1000 + Math.random() * 2000},
+          {value: 10 + Math.random() * 20, duration: 1000 + Math.random() * 2000}
+        ],
+        direction: 'alternate',
+        loop: true,
         duration: 1000,
         easing: 'easeOutExpo'
       });
@@ -355,8 +402,11 @@
       
       // Delayed display of TV scan line effect
       setTimeout(() => {
-        document.querySelector('.tv-scan-effect').style.opacity = '0.7';
+        document.querySelector('.tv-scan-effect').style.opacity = '0.8'; // 增加扫描线效果强度
       }, 12000);
+      
+      // 启动底部涌动效果
+      createBottomSurgeEffect();
       
       // Fade in the Enter World button after 15 seconds
       setTimeout(() => {
@@ -371,10 +421,10 @@
         // Add subtle pulsing animation to the button
         anime({
           targets: '#enter-world-button',
-          boxShadow: [
-            '0 0 15px rgba(255, 0, 0, 0.7)',
-            '0 0 25px rgba(255, 0, 0, 0.9)',
-            '0 0 15px rgba(255, 0, 0, 0.7)'
+          textShadow: [
+            '0 0 8px rgba(255, 255, 255, 0.7)',
+            '0 0 12px rgba(255, 255, 255, 0.9)',
+            '0 0 8px rgba(255, 255, 255, 0.7)'
           ],
           duration: 2000,
           direction: 'alternate',
@@ -468,7 +518,7 @@
       requestAnimationFrame(drawTVLines);
     }
     
-    // Draw TV scan lines effect - MODIFIED for better white text visibility
+    // Draw TV scan lines effect - 增强线条效果
     let phase = 0;
     let tvLineHeight = 4;
     
@@ -478,38 +528,42 @@
         return;
       }
       
-      // Slow down phase change - slows overall animation
-      phase += 0.001; // Reduced to 0.005 (was 0.01)
+      // 放慢相位变化，降低整体动画速度
+      phase += 0.001;
       
-      // Gradually add red background with REDUCED opacity
-      // This change allows white text to be more visible by making background less opaque
-      ctx.fillStyle = 'rgba(178, 34, 34, 0.01)'; // Further reduced to 0.03 (was 0.05)
+      // 降低红色背景的不透明度，让白字更明显
+      ctx.fillStyle = 'rgba(178, 34, 34, 0.01)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Draw TV scan lines - delayed display
-      if (phase > 10) { // Increased to 10 (was 8) to delay scan line appearance
+      // 绘制电视扫描线效果
+      if (phase > 10) {
         const scanLines = Math.floor(canvas.height / tvLineHeight);
         
         for (let i = 0; i < scanLines; i++) {
           if (i % 2 === 0) {
-            // Random brightness red scan lines with REDUCED opacity
+            // 随机亮度的红色扫描线
             const brightness = 200 + Math.random() * 55;
             const yPos = i * tvLineHeight;
             
-            // Reduced scan line opacity to allow white text to show through better
+            // 调整扫描线的不透明度
             ctx.fillStyle = `rgba(${brightness}, ${Math.floor(brightness/8)}, ${Math.floor(brightness/8)}, ${0.2 + Math.random() * 0.15})`;
             ctx.fillRect(0, yPos, canvas.width, tvLineHeight / 2);
             
-            // Occasionally add horizontal interference lines with REDUCED opacity
-            if (Math.random() > 0.99) {
-              ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'; // Reduced from 0.8
+            // 增加水平干扰线的频率
+            if (Math.random() > 0.97) { // 从0.99降至0.97，增加频率
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; // 增加亮度到0.8
               ctx.fillRect(0, Math.random() * canvas.height, canvas.width, 2 + Math.random() * 3);
+              
+              // 添加一些红色干扰线
+              if (Math.random() > 0.5) {
+                ctx.fillStyle = 'rgba(255, 20, 20, 0.7)';
+                ctx.fillRect(0, Math.random() * canvas.height, canvas.width, 1 + Math.random() * 2);
+              }
             }
           }
         }
         
-        // Text melting effect - Uncommenting for full animation
-        // Occasionally add dripping red with REDUCED opacity
+        // 偶尔添加滴落效果
         if (Math.random() > 0.95) {
           for (let i = 0; i < 3; i++) {
             const x = Math.random() * canvas.width;
@@ -528,8 +582,7 @@
               ctx.lineTo(currentX, currentY);
             }
             
-            // Reduced opacity of dripping effect so white text is more visible
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Reduced from 0.7
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
             ctx.lineWidth = 1 + Math.random() * 3;
             ctx.stroke();
           }
