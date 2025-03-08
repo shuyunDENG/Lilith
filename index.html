@@ -228,7 +228,7 @@
     const powerWords = [
       '自我', '造物主', '创造', '选择', '梦', '内敛', '聪明', '敏锐',
       '寿', 'XX', '第一性', '雌', '坚韧', '直觉', '野心', '∞', '心愿',
-      '实现'
+      '实现', '权'
     ];
       
     
@@ -306,7 +306,7 @@
         for (let i = 0; i < 15; i++) {  // 增加数量从10到15
           const fragment = document.createElement('div');
           fragment.className = 'freedom-fragment chaos-fragment-enhanced bottom-surge';  // 添加bottom-surge类
-          fragment.innerText = stereotypeWords[Math.floor(Math.random() * chaosFragments.length)];
+          fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
           
           // 使用更大更亮的白字
           fragment.style.color = 'rgb(100, 100, 100)';
