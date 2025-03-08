@@ -49,7 +49,6 @@
       z-index: 5;
     }
     
-    /* TV scan line effect - 优化扫描线效果 */
     .tv-scan-effect {
       position: fixed;
       top: 0;
@@ -61,15 +60,15 @@
       opacity: 0;
       background: linear-gradient(
         transparent 50%, 
-        rgba(255, 60, 60, 0.15) 50%  /* 降低不透明度从0.25到0.15 */
+        rgba(255, 60, 60, 0.15) 50%
       );
-      background-size: 100% 6px;  /* 增大扫描线间距从3px到6px */
-      animation: scanline 0.12s linear infinite;  /* 减缓动画速度 */
+      background-size: 100% 6px;
+      animation: scanline 0.12s linear infinite;
     }
     
     @keyframes scanline {
       0% { transform: translateY(0); }
-      100% { transform: translateY(6px); }  /* 匹配background-size */
+      100% { transform: translateY(6px); }
     }
     
     .freedom-fragment {
@@ -77,38 +76,16 @@
       font-weight: bold;
       opacity: 0;
       pointer-events: none;
-      z-index: 25;  /* 提高层级，确保在扫描线上方 */
+      z-index: 25;
     }
 
-    /* Additional styles for word-container and freedom spans */
-    .inline-block {
-      display: inline-block;
-    }
+    .inline-block { display: inline-block; }
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .font-bold { font-weight: bold; }
+    .hidden { display: none; }
     
-    .relative {
-      position: relative;
-    }
-    
-    .absolute {
-      position: absolute;
-    }
-    
-    .inset-0 {
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-    }
-    
-    .font-bold {
-      font-weight: bold;
-    }
-    
-    .hidden {
-      display: none;
-    }
-    
-    /* Enter World Button */
     .enter-world-button {
       position: fixed;
       top: 50%;
@@ -134,15 +111,8 @@
       text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
     }
     
-    /* 增强白色字符的视觉效果 */
-    .chaos-fragment-enhanced {
-      text-shadow: 0 0 12px rgba(255, 255, 255, 1);  /* 增强发光效果 */
-      font-weight: bolder;
-      mix-blend-mode: lighten;
-      filter: brightness(0.5);  /* 增加亮度 */
-    }
-
-    .dark-fragment{
+    /* 暗色文字样式 */
+    .dark-fragment {
       text-shadow: none;
       font-weight: bold;
       mix-blend-mode: normal;
@@ -152,23 +122,15 @@
 
     /* 底部涌动的暗色文字 */
     .dark-bottom-surge {
-      z-index: 30;  /* 更高的层级 */
-      font-size: 1.5rem !important;  /* 更大的字体 */
-      opacity: 0.7;  /* 稍微提高不透明度 */
+      z-index: 30;
+      font-size: 1.5rem !important;
+      opacity: 0.7;
     }
-
     
-    /* 底部涌动区域的特殊样式 */
-    .bottom-surge {
-      z-index: 30;  /* 更高的层级 */
-      text-shadow: 0 0 15px rgba(255, 255, 255, 1), 0 0 10px rgba(255, 255, 255, 0.8);  /* 双层发光效果 */
-      font-size: 1.5rem !important;  /* 更大的字体 */
-      filter: brightness(1.5) contrast(1.2);  /* 增强亮度和对比度 */
-    }
-
-    .power-word-fragment{
+    /* 发光文字样式 */
+    .power-word-fragment {
       position: absolute;
-      font-weight:bold;
+      font-weight: bold;
       opacity: 0;
       pointer-events: none;
       z-index: 28;
@@ -179,7 +141,6 @@
     }
   </style>
 </head>
-
 
 <body>
   <div class="container">
@@ -203,102 +164,65 @@
   <div class="tv-scan-effect"></div>
   <canvas id="chaos-canvas"></canvas>
   
-  <!-- Add Enter World Button -->
   <button id="enter-world-button" class="enter-world-button">ENTER THE WORLD</button>
   
   <script>
-    // "Freedom" in different languages and dissolution-related vocabulary
-    const freedomWords = [
-      '自由','freedom',   
-      'liberté',       
-      'Freiheit',      
-      'libertad',       
-      'свобода',        // Russian
-      '자유',           // Korean
-      'libertà',        // Italian
-      'vrijheid',       // Dutch
-      'svoboda',        // Czech
-      'szabadság',      // Hungarian
-      'sloboda',        // Slovak
-      'frihed',         // Danish
-      'vapaus',         // Finnish
-      'frihet',         // Swedish
-      'λευτεριά',       // Greek
-      'حرية',           // Arabic
-      'स्वतंत्रता',     // Hindi
-      'özgürlük',       // Turkish
-      '自由',           // Japanese
-      'เสรีภาพ',        // Thai
-      'स्वाधीनता',      // Nepali
-      'bekebasan',      // Indonesian
-      'sloboda',        // Croatian
-    ];
+    // 多语言"自由"词汇 - 精简版
+    const freedomWords = ['自由', 'Freedom', 'Liberté', 'Freiheit', 'Libertad', 'свобода', '자유', 'özgürlük'];
     
-    // Chaos text fragments
+    // 暗色文字 - stereotypeWords
     const stereotypeWords = [
       '女', '嫁', '生', '子宫', '阴道', '少女', '月经', '嫉妒', 
-      '女孩', '女人', '疯', '阁楼', '耻', '美‘, '婊', '贱', '蠢', 
-      '妈妈', '改造', '处女', '爱', '母爱', '敏感','软弱'
+      '女孩', '女人', '疯', '阁楼', '耻', '美', '婊', '贱', '蠢', 
+      '妈妈', '改造', '处女', '爱', '母爱', '敏感', '软弱'
     ];
 
+    // 发光文字 - powerWords
     const powerWords = [
       '自我', '造物主', '创造', '选择', '梦', '内敛', '聪明', '敏锐',
       '寿', 'XX', '第一性', '雌', '坚韧', '直觉', '野心', '∞', '心愿',
       '实现', '权', '柔软'
     ];
       
-    
-    // Main animation timeline
     let mainAnimation;
     let chaosMode = false;
     let canvas, ctx;
     
-    // Continuous text generation function
+    // 连续文本生成控制变量
     let generationSpeed = 15;
     let maxTexts = 5000;
     let totalTextsCreated = 0;
     let textGenerationInterval;
     
-    // Set up Enter World button functionality
-    const enterWorldButton = document.getElementById('enter-world-button');
-    
-    enterWorldButton.addEventListener('click', function() {
-      // Handle the button click - for now just alert
+    // 设置进入按钮功能
+    document.getElementById('enter-world-button').addEventListener('click', function() {
       alert('ENTER THE WORLD... This would connect to another port/system');
-      
-      // Here you would typically redirect or call an external function:这里是要加跳转新页面的意思，要像下面这样写
       // window.location.href = 'destination.html';
     });
 
-    // 中文注释：新增函数，专门用于创建powerWords的发光效果
+    // 创建powerWords发光效果
     function createPowerWordsEffect() {
       setInterval(() => {
-        // 每次创建一批从底部涌出的文字
-        for (let i = 0; i < 8; i++) {  // 控制数量
+        for (let i = 0; i < 8; i++) {
           const fragment = document.createElement('div');
-          fragment.className = 'power-word-fragment'; // 使用新样式
+          fragment.className = 'power-word-fragment';
           fragment.innerText = powerWords[Math.floor(Math.random() * powerWords.length)];
           
-          // 设置亮白色
           fragment.style.color = 'rgb(255, 255, 255)';
-          
-          // 从底部开始
           fragment.style.top = '100vh';
           fragment.style.left = (Math.random() * 100) + 'vw';
           fragment.style.opacity = '0';
           document.body.appendChild(fragment);
           
-          // 向上涌动动画，带有更强的光效
           anime({
             targets: fragment,
             opacity: [0, 0.9], 
-            translateY: [0, -200 - Math.random() * 300], // 更长的上升距离
-            translateX: [0, -30 + Math.random() * 60], // 轻微左右漂移
-            scale: [0.8, 1.2], // 缩放效果
-            duration: 5000 + Math.random() * 3000, // 更慢的上升
+            translateY: [0, -200 - Math.random() * 300],
+            translateX: [0, -30 + Math.random() * 60],
+            scale: [0.8, 1.2],
+            duration: 5000 + Math.random() * 3000,
             easing: 'easeOutQuad',
             complete: function() {
-              // 完成后淡出
               anime({
                 targets: fragment,
                 opacity: 0,
@@ -312,36 +236,30 @@
             }
           });
         }
-      }, 600); // 频率较低，避免过于密集
+      }, 600);
     }
     
-    // 优化的底部涌动效果 -仅用于stereotypeWords
+    // 创建stereotypeWords暗色效果
     function createBottomSurgeEffect() {
       setInterval(() => {
-        // 每次创建一批从底部涌出的文字
-        for (let i = 0; i < 15; i++) {  // 增加数量从10到15
+        for (let i = 0; i < 15; i++) {
           const fragment = document.createElement('div');
-          fragment.className = 'freedom-fragment dark-fragment dark-bottom-surge';  // 添加bottom-surge类
+          fragment.className = 'freedom-fragment dark-fragment dark-bottom-surge';
           fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
           
-          // 使用更大更亮的白字
           fragment.style.color = 'rgb(100, 100, 100)';
-          
-          // 从底部开始
           fragment.style.top = '100vh';
           fragment.style.left = (Math.random() * 100) + 'vw';
           fragment.style.opacity = '0';
           document.body.appendChild(fragment);
           
-          // 改进的向上涌动动画
           anime({
             targets: fragment,
-            opacity: [0, 0.7],  // 增加最大不透明度
-            translateY: [0, -150 - Math.random() * 250],  // 更长的上升距离
+            opacity: [0, 0.7],
+            translateY: [0, -150 - Math.random() * 250],
             duration: 4000 + Math.random() * 3000,
             easing: 'easeOutQuad',
             complete: function() {
-              // 完成后淡出
               anime({
                 targets: fragment,
                 opacity: 0,
@@ -355,26 +273,19 @@
             }
           });
         }
-      }, 400);  // 稍微减少频率，避免过于密集
+      }, 400);
     }
     
     function startContinuousTextGeneration() {
-      // Clear previous interval
       if (textGenerationInterval) clearInterval(textGenerationInterval);
       
-      // Set initial values
       generationSpeed = 20;
       totalTextsCreated = 0;
       
-      // Create interval function for continuous text generation
       textGenerationInterval = setInterval(() => {
-        // Increment generation speed
         generationSpeed += 1.5;
-        
-        // Generate new batch of text
         createBatchOfTexts(Math.floor(generationSpeed));
         
-        // Check if limit reached
         if (totalTextsCreated > maxTexts) {
           clearInterval(textGenerationInterval);
           console.log("Text generation limit reached");
@@ -382,13 +293,11 @@
       }, 80);
     }
     
-    // Generate a batch of text
+    // 生成一批文本
     function createBatchOfTexts(count) {
       for (let i = 0; i < count; i++) {
-        // Stop if over limit
         if (totalTextsCreated >= maxTexts) return;
         
-        // Randomly choose between freedom word or fragment word
         const isFreeTerm = Math.random() > 0.3;
         
         if (isFreeTerm) {
@@ -401,25 +310,21 @@
       }
     }
     
-    // Create a single freedom word
+    // 创建单个自由词
     function createSingleFreedomText() {
       const clone = document.createElement('div');
       clone.className = 'free-clone';
       const word = freedomWords[Math.floor(Math.random() * freedomWords.length)];
       clone.innerText = word;
       
-      // Font style
       clone.style.fontSize = (Math.random() * 3 + 2) + 'rem';
       clone.style.fontWeight = 'bold';
-      
-      // Random position
       clone.style.top = Math.random() * 100 + 'vh';
       clone.style.left = Math.random() * 100 + 'vw';
       clone.style.transform = `rotate(${Math.random() * 360}deg)`;
-      clone.style.opacity = '0'; // Initially transparent
+      clone.style.opacity = '0';
       document.body.appendChild(clone);
       
-      // Apply animation directly
       anime({
         targets: clone,
         opacity: [0, Math.random() * 0.3 + 0.7],
@@ -429,34 +334,29 @@
       });
     }
     
-    // 优化的单字创建函数
+    // 创建单个暗色文字
     function createSingleFragmentText() {
       const fragment = document.createElement('div');
       fragment.className = 'freedom-fragment dark-fragment';
       fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
       
-      // 增强字体样式
       fragment.style.fontSize = (Math.random() * 2 + 1.2) + 'rem';
-      
-      // 更亮的白色
-       const darkness = 80 + Math.floor(Math.random() * 40);  // 暗灰色
+      const darkness = 80 + Math.floor(Math.random() * 40);
       fragment.style.color = `rgb(${darkness}, ${darkness}, ${darkness})`;
       fragment.style.fontWeight = 'bold';
       
-      // 减少普通的混沌字符，让底部的涌动字符更加明显
-      if (Math.random() > 0.7) {  // 增加可能性不显示在顶部
-        fragment.style.top = (Math.random() * 30 + 70) + 'vh';  // 底部区域
+      if (Math.random() > 0.7) {
+        fragment.style.top = (Math.random() * 30 + 70) + 'vh';
       } else {
-        fragment.style.top = (Math.random() * 70) + 'vh';  // 其他区域
+        fragment.style.top = (Math.random() * 70) + 'vh';
       }
       fragment.style.left = Math.random() * 100 + 'vw';
       fragment.style.opacity = '0';
       document.body.appendChild(fragment);
       
-      // 添加上下浮动的涌动效果
       anime({
         targets: fragment,
-        opacity: [0, Math.random() * 0.7 + 0.3],  // 稍微降低不透明度，减少干扰
+        opacity: [0, Math.random() * 0.7 + 0.3],
         scale: [0, 1.2],
         translateY: [
           {value: -10 + Math.random() * 20, duration: 1000 + Math.random() * 2000},
@@ -469,12 +369,11 @@
       });
     }
     
-    // Create chaos effect
+    // 创建混沌效果
     function createChaosEffect() {
       chaosMode = true;
       document.body.style.backgroundColor = "#FF3232";
       
-      // Create slower red pulsating effect
       anime({
         targets: 'body',
         backgroundColor: ['#FF3232', '#B22222', '#FF0000', '#D70000'],
@@ -484,7 +383,6 @@
         easing: 'easeInOutSine'
       });
 
-      // Delayed hiding of main text
       anime({
         targets: '#main-text',
         opacity: 0,
@@ -492,16 +390,14 @@
         easing: 'easeInOutQuad'
       });
       
-      // 优化电视扫描线效果，降低不透明度
       setTimeout(() => {
-        document.querySelector('.tv-scan-effect').style.opacity = '0.5';  // 降低从0.8到0.5
+        document.querySelector('.tv-scan-effect').style.opacity = '0.5';
       }, 12000);
       
-      // 启动底部涌动效果 -> 分别启动两个效果
-      createBottomSurgeEffect(); //stereotype效果
-      createPowerWordsEffect(); //powerWords 效果
+      // 启动两组文字效果
+      createBottomSurgeEffect(); // stereotypeWords暗色效果
+      createPowerWordsEffect();  // powerWords发光效果
       
-      // Fade in the Enter World button after 15 seconds
       setTimeout(() => {
         anime({
           targets: '#enter-world-button',
@@ -511,7 +407,6 @@
           easing: 'easeOutQuad'
         });
         
-        // Add subtle pulsing animation to the button
         anime({
           targets: '#enter-world-button',
           textShadow: [
@@ -526,23 +421,17 @@
         });
       }, 15000);
       
-      // 调整连续文本生成的速度
       startContinuousTextGeneration();
       
-      // Delayed start of Canvas effect
       setTimeout(() => {
         canvas.style.opacity = 1;
       }, 5000);
     }
     
-    // Create text fragments
-    //只创建stereotype
+    // 创建初始文本片段 - 只使用stereotypeWords
     function createTextFragments() {
-      // Increase density - more columns and rows
       const cols = 50;
       const rows = 40;
-      
-      // Pre-create all elements
       const fragments = [];
       
       for (let i = 0; i < rows; i++) {
@@ -551,15 +440,11 @@
           fragment.className = 'freedom-fragment dark-fragment';
           fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
           
-          // Clear pixelated text - ENHANCED
           fragment.style.fontSize = (Math.random() * 1.8 + 1) + 'rem';
-          
-          // Higher contrast white for better visibility
           const darkness = 80 + Math.floor(Math.random() * 40);
           fragment.style.color = `rgb(${darkness}, ${darkness}, ${darkness})`;
           fragment.style.fontWeight = 'bold';
           
-          // Arrange in grid with slight random offset
           fragment.style.top = `${(i * 100 / rows) + Math.random() * 3}vh`;
           fragment.style.left = `${(j * 100 / cols) + Math.random() * 3}vw`;
           
@@ -568,7 +453,6 @@
         }
       }
       
-      // Then create animations for all elements at once
       anime({
         targets: fragments,
         opacity: [0, (el, i) => Math.random() * 0.8 + 0.4],
@@ -594,7 +478,7 @@
       });
     }
     
-    // Initialize Canvas
+    // 初始化画布
     function initCanvas() {
       canvas = document.getElementById('chaos-canvas');
       ctx = canvas.getContext('2d');
@@ -607,13 +491,12 @@
       canvas.style.left = '0';
       canvas.style.zIndex = '1';
       
-      // Start drawing red scan lines
       requestAnimationFrame(drawTVLines);
     }
     
-    // 优化的TV扫描线效果
+    // TV扫描线效果
     let phase = 0;
-    let tvLineHeight = 6;  // 增大线高，减少线条密度
+    let tvLineHeight = 6;
     
     function drawTVLines() {
       if (!chaosMode) {
@@ -621,47 +504,36 @@
         return;
       }
       
-      // 放慢相位变化
       phase += 0.001;
-      
-      // 降低红色背景的不透明度，让白字更明显
       ctx.fillStyle = 'rgba(178, 34, 34, 0.01)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // 绘制电视扫描线效果 - 降低密度和强度
       if (phase > 10) {
         const scanLines = Math.floor(canvas.height / tvLineHeight);
         
-        // 只绘制部分扫描线，创造更多"视觉空间"
         for (let i = 0; i < scanLines; i++) {
-          // 只显示一半的扫描线，增加间隔
-          if (i % 3 === 0) {  // 由每隔1行显示改为每隔2行显示
-            // 降低红色扫描线的不透明度
+          if (i % 3 === 0) {
             const brightness = 200 + Math.random() * 55;
             const yPos = i * tvLineHeight;
             
-            ctx.fillStyle = `rgba(${brightness}, ${Math.floor(brightness/8)}, ${Math.floor(brightness/8)}, ${0.15 + Math.random() * 0.1})`;  // 降低不透明度
+            ctx.fillStyle = `rgba(${brightness}, ${Math.floor(brightness/8)}, ${Math.floor(brightness/8)}, ${0.15 + Math.random() * 0.1})`;
             ctx.fillRect(0, yPos, canvas.width, tvLineHeight / 2);
             
-            // 降低水平干扰线的频率，避免过度干扰底部字符
-            if (Math.random() > 0.985) {  // 从0.97改为0.985，降低频率
-              ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';  // 降低亮度
-              ctx.fillRect(0, Math.random() * (canvas.height * 0.7), canvas.width, 2 + Math.random() * 3);  // 主要在上部70%区域显示
+            if (Math.random() > 0.985) {
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+              ctx.fillRect(0, Math.random() * (canvas.height * 0.7), canvas.width, 2 + Math.random() * 3);
               
-              // 减少红色干扰线
-              if (Math.random() > 0.7) {  // 降低概率
-                ctx.fillStyle = 'rgba(255, 20, 20, 0.5)';  // 降低不透明度
-                ctx.fillRect(0, Math.random() * (canvas.height * 0.6), canvas.width, 1 + Math.random() * 2);  // 主要在上部60%区域显示
+              if (Math.random() > 0.7) {
+                ctx.fillStyle = 'rgba(255, 20, 20, 0.5)';
+                ctx.fillRect(0, Math.random() * (canvas.height * 0.6), canvas.width, 1 + Math.random() * 2);
               }
             }
           }
         }
         
-        // 偶尔添加滴落效果，但减少在底部区域的出现
         if (Math.random() > 0.95) {
-          for (let i = 0; i < 2; i++) {  // 减少滴落数量
+          for (let i = 0; i < 2; i++) {
             const x = Math.random() * canvas.width;
-            // 限制只在上部区域开始滴落
             const startY = Math.random() * (canvas.height * 0.3);
             const length = 20 + Math.random() * 80;
             
@@ -677,8 +549,8 @@
               ctx.lineTo(currentX, currentY);
             }
             
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.4)';  // 进一步降低不透明度
-            ctx.lineWidth = 1 + Math.random() * 2;  // 稍微减小线宽
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.4)';
+            ctx.lineWidth = 1 + Math.random() * 2;
             ctx.stroke();
           }
         }
@@ -687,7 +559,7 @@
       requestAnimationFrame(drawTVLines);
     }
     
-    // Window resize
+    // 窗口调整大小
     window.addEventListener('resize', function() {
       if (canvas) {
         canvas.width = window.innerWidth;
@@ -695,12 +567,10 @@
       }
     });
     
-    // Page load
+    // 页面加载
     window.onload = function() {
-      // Initialize Canvas
       initCanvas();
       
-      // Words scatter animation
       mainAnimation = anime.timeline()
         .add({
           targets: ['#ziwo', '#wo', '#fang', '#zhu'],
@@ -724,7 +594,7 @@
         .add({
           duration: 500,
           complete: () => {
-            // Create first wave of freedom text
+            // 创建第一波自由文本
             function createInitialFreedomTexts(count) {
               const fragments = [];
               
@@ -736,11 +606,8 @@
                 
                 clone.style.fontSize = (Math.random() * 3 + 2) + 'rem';
                 clone.style.fontWeight = 'bold';
-                
-                // Initial clones centered in center area
                 clone.style.top = Math.random() * 100 + 'vh';
                 clone.style.left = Math.random() * 100 + 'vw';
-                
                 clone.style.transform = `rotate(${Math.random() * 360}deg)`;
                 document.body.appendChild(clone);
                 fragments.push(clone);
@@ -758,7 +625,7 @@
             
             createInitialFreedomTexts(150);
             
-            // Text shaking effect
+            // 文本抖动效果
             const mainText = document.getElementById('main-text');
             anime({
               targets: mainText,
@@ -770,7 +637,7 @@
               loop: 2
             });
             
-            // Enter chaos mode after 8 seconds
+            // 8秒后进入混沌模式
             setTimeout(createChaosEffect, 8000);
           }
         });
