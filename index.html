@@ -151,6 +151,8 @@
     }
   </style>
 </head>
+
+
 <body>
   <div class="container">
     <h1 id="main-text">
@@ -205,11 +207,18 @@
     ];
     
     // Chaos text fragments
-    const chaosFragments = [
-      '女', '嫁', '生', '子宫', '阴道', '束', '月经', '嫉妒', 
-      '女孩', '女人', '疯', '阁楼', '羞耻', '婊', '贱', '梦', 
-      '妈妈', '改造', '自我', '权', '∞', '√', '×', '÷'
+    const stereotypeWords = [
+      '女', '嫁', '生', '子宫', '阴道', '少女', '月经', '嫉妒', 
+      '女孩', '女人', '疯', '阁楼', '耻', '美‘, '婊', '贱', '蠢', 
+      '妈妈', '改造', '处女', '爱', '母爱', '敏感'
     ];
+
+    const powerWords = [
+      '自我', '造物主', '创造', '选择', '梦', '内敛', '聪明', '敏锐',
+      '寿', 'XX', '第一性', '雌', '坚韧', '直觉', '野心', '∞', '心愿',
+      '实现'
+    ];
+      
     
     // Main animation timeline
     let mainAnimation;
@@ -227,9 +236,9 @@
     
     enterWorldButton.addEventListener('click', function() {
       // Handle the button click - for now just alert
-      alert('Entering the world... This would connect to another port/system');
+      alert('ENTER THE WORLD... This would connect to another port/system');
       
-      // Here you would typically redirect or call an external function:
+      // Here you would typically redirect or call an external function:这里是要加跳转新页面的意思，要像下面这样写
       // window.location.href = 'destination.html';
     });
     
