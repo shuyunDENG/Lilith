@@ -149,6 +149,14 @@
       filter: none;
       opacity: 0.6;
     }
+
+    /* 底部涌动的暗色文字 */
+    .dark-bottom-surge {
+      z-index: 30;  /* 更高的层级 */
+      font-size: 1.5rem !important;  /* 更大的字体 */
+      opacity: 0.7;  /* 稍微提高不透明度 */
+    }
+
     
     /* 底部涌动区域的特殊样式 */
     .bottom-surge {
@@ -313,7 +321,7 @@
         // 每次创建一批从底部涌出的文字
         for (let i = 0; i < 15; i++) {  // 增加数量从10到15
           const fragment = document.createElement('div');
-          fragment.className = 'freedom-fragment dark-fragment bottom-surge';  // 添加bottom-surge类
+          fragment.className = 'freedom-fragment dark-fragment dark-bottom-surge';  // 添加bottom-surge类
           fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
           
           // 使用更大更亮的白字
