@@ -141,6 +141,14 @@
       mix-blend-mode: lighten;
       filter: brightness(0.5);  /* 增加亮度 */
     }
+
+    .dark-fragment{
+      text-shadow: none;
+      font-weight: bold;
+      mix-blend-mode: normal;
+      filter: none;
+      opacity: 0.6;
+    }
     
     /* 底部涌动区域的特殊样式 */
     .bottom-surge {
@@ -222,13 +230,13 @@
     const stereotypeWords = [
       '女', '嫁', '生', '子宫', '阴道', '少女', '月经', '嫉妒', 
       '女孩', '女人', '疯', '阁楼', '耻', '美‘, '婊', '贱', '蠢', 
-      '妈妈', '改造', '处女', '爱', '母爱', '敏感'
+      '妈妈', '改造', '处女', '爱', '母爱', '敏感','软弱'
     ];
 
     const powerWords = [
       '自我', '造物主', '创造', '选择', '梦', '内敛', '聪明', '敏锐',
       '寿', 'XX', '第一性', '雌', '坚韧', '直觉', '野心', '∞', '心愿',
-      '实现', '权'
+      '实现', '权', '柔软'
     ];
       
     
@@ -305,7 +313,7 @@
         // 每次创建一批从底部涌出的文字
         for (let i = 0; i < 15; i++) {  // 增加数量从10到15
           const fragment = document.createElement('div');
-          fragment.className = 'freedom-fragment chaos-fragment-enhanced bottom-surge';  // 添加bottom-surge类
+          fragment.className = 'freedom-fragment dark-fragment bottom-surge';  // 添加bottom-surge类
           fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
           
           // 使用更大更亮的白字
@@ -416,7 +424,7 @@
     // 优化的单字创建函数
     function createSingleFragmentText() {
       const fragment = document.createElement('div');
-      fragment.className = 'freedom-fragment chaos-fragment-enhanced';
+      fragment.className = 'freedom-fragment dark-fragment';
       fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
       
       // 增强字体样式
@@ -532,7 +540,7 @@
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
           const fragment = document.createElement('div');
-          fragment.className = 'freedom-fragment chaos-fragment-enhanced';
+          fragment.className = 'freedom-fragment dark-fragment';
           fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
           
           // Clear pixelated text - ENHANCED
