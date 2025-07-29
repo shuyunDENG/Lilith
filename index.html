@@ -1,647 +1,440 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">   
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lilith</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-  <style>
-    body {
-      overflow: hidden;
-      margin: 0;
-      padding: 0;
-      background-color: white;
-      font-family: serif;
-      transition: background-color 8s;
-    }
-    
-    .container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-      padding: 0 20px;
-      position: relative;
-      z-index: 10;
-    }
-    
-    h1 {
-      font-size: 2rem;
-      line-height: 1.7;
-      color: black;
-      transition: opacity 5s, transform 5s, color 3s;
-    }
-    
-    @media (min-width: 768px) {
-      h1 {
-        font-size: 2.5rem;
-      }
-    }
-    
-    .free-clone {
-      position: absolute;
-      font-weight: bold;
-      color: #B22222;
-      opacity: 0;
-      pointer-events: none;
-      white-space: nowrap;
-      z-index: 5;
-    }
-    
-    .tv-scan-effect {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 20;
-      opacity: 0;
-      background: linear-gradient(
-        transparent 50%, 
-        rgba(255, 60, 60, 0.15) 50%
-      );
-      background-size: 100% 6px;
-      animation: scanline 0.12s linear infinite;
-    }
-    
-    @keyframes scanline {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(6px); }
-    }
-    
-    .freedom-fragment {
-      position: absolute;
-      font-weight: bold;
-      opacity: 0;
-      pointer-events: none;
-      z-index: 25;
-    }
-
-    .inline-block { display: inline-block; }
-    .relative { position: relative; }
-    .absolute { position: absolute; }
-    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-    .font-bold { font-weight: bold; }
-    .hidden { display: none; }
-    
-    .enter-world-button {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 12px 20px;
-      font-size: 0.8rem;
-      background-color: transparent;
-      color: white;
-      border: none;
-      cursor: pointer;
-      z-index: 100;
-      opacity: 0;
-      transition: all 0.3s ease;
-      font-family: serif;
-      font-weight: normal;
-      letter-spacing: 3px;
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
-    }
-    
-    .enter-world-button:hover {
-      letter-spacing: 4px;
-      text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
-    }
-    
-    /* 暗色文字样式 */
-    .dark-fragment {
-      text-shadow: none;
-      font-weight: bold;
-      mix-blend-mode: normal;
-      filter: none;
-      opacity: 0.6;
-    }
-
-    /* 底部涌动的暗色文字 */
-    .dark-bottom-surge {
-      z-index: 30;
-      font-size: 1.5rem !important;
-      opacity: 0.7;
-    }
-    
-    /* 发光文字样式 */
-    .power-word-fragment {
-      position: absolute;
-      font-weight: bold;
-      opacity: 0;
-      pointer-events: none;
-      z-index: 28;
-      text-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 15px rgba(255, 255, 255, 0.9);
-      font-size: 1.8rem !important;
-      filter: brightness(1.7) contrast(1.3);
-      color: white !important;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>systeme_for_interaction_of_alien_creature</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ml5/0.12.2/ml5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            font-family: 'Arial', sans-serif;
+            color:white;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #status {
+            margin: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            text-align: center;
+        }
+        #controls {
+            margin: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;         
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #memory {
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 10px;
+            max-width: 600px;
+        }
+    </style>
 </head>
-
 <body>
-  <div class="container">
-    <h1 id="main-text">
-      莉莉丝因为不满亚当的命令式语气而主动离开了伊甸园，<br>
-      此举被上帝判定为「
-      <span id="word-container" class="inline-block relative">
-        <span id="ziwo" class="inline-block font-bold">自</span>
-        <span id="wo" class="inline-block font-bold">我</span>
-        <span id="fang" class="inline-block font-bold">放</span>
-        <span id="zhu" class="inline-block font-bold">逐</span>
-        <span id="freedom" class="absolute inset-0 hidden" style="justify-content: center; color: #8B0000; font-size: 1.5em; font-weight: bold;">
-          <span>自</span>
-          <span>由</span>
-        </span>
-      </span>
-      」。
-    </h1>
-  </div>
-  
-  <div class="tv-scan-effect"></div>
-  <canvas id="chaos-canvas"></canvas>
-  
-  <button id="enter-world-button" class="enter-world-button">ENTER THE WORLD</button>
-  
-  <script>
-    // 多语言"自由"词汇 - 精简版
-    const freedomWords = ['自由', 'Freedom', 'Liberté', 'Freiheit', 'Libertad', 'свобода', '자유', 'özgürlük'];
-    
-    // 暗色文字 - stereotypeWords
-    const stereotypeWords = [
-      '女', '嫁', '生', '子宫', '阴道', '少女', '月经', '嫉妒', 
-      '女孩', '女人', '疯', '阁楼', '耻', '美', '婊', '贱', '蠢', 
-      '妈妈', '改造', '处女', '爱', '母爱', '敏感', '软弱'
-    ];
+    <div id="container">
+        <h1>🛸 智能外星人互动系统</h1>
+        <div id="status">
+            <div>状态: <span id="statusText">初始化中...</span></div>
+            <div>情绪: <span id="moodText">好奇</span></div>
+            <div>学习进度: <span id="learningText">0%</span></div>
+        </div>
+        <div id="controls">
+            <button onclick="resetAlien()">重置外星人</button>
+            <button onclick="toggleLearning()">切换学习模式</button>
+            <button onclick="showMemory()">显示记忆</button>
+        </div>
+        <div id="memory" style="display:none;">
+            <h3>外星人的记忆库:</h3>
+            <div id="memoryContent"></div>
+        </div>
+    </div>
 
-    // 发光文字 - powerWords
-    const powerWords = [
-      '自我', '造物主', '创造', '选择', '梦', '内敛', '聪明', '敏锐',
-      '寿', 'XX', '第一性', '雌', '坚韧', '直觉', '野心', '∞', '心愿',
-      '实现', '权', '柔软'
-    ];
-      
-    let mainAnimation;
-    let chaosMode = false;
-    let canvas, ctx;
-    
-    // 连续文本生成控制变量
-    let generationSpeed = 15;
-    let maxTexts = 5000;
-    let totalTextsCreated = 0;
-    let textGenerationInterval;
-    
-    // 设置进入按钮功能
-    document.getElementById('enter-world-button').addEventListener('click', function() {
-      alert('ENTER THE WORLD... This would connect to another port/system');
-      // window.location.href = 'destination.html';
-    });
+    <script>
+        let video;
+        let handpose;
+        let predictions = [];
+        let alien;
+        let isLearning = true;
+        let memoryBank = [];
+        let canvas;
 
-    // 创建powerWords发光效果
-    function createPowerWordsEffect() {
-      setInterval(() => {
-        for (let i = 0; i < 8; i++) {
-          const fragment = document.createElement('div');
-          fragment.className = 'power-word-fragment';
-          fragment.innerText = powerWords[Math.floor(Math.random() * powerWords.length)];
-          
-          fragment.style.color = 'rgb(255, 255, 255)';
-          fragment.style.top = '100vh';
-          fragment.style.left = (Math.random() * 100) + 'vw';
-          fragment.style.opacity = '0';
-          document.body.appendChild(fragment);
-          
-          anime({
-            targets: fragment,
-            opacity: [0, 0.9], 
-            translateY: [0, -200 - Math.random() * 300],
-            translateX: [0, -30 + Math.random() * 60],
-            scale: [0.8, 1.2],
-            duration: 5000 + Math.random() * 3000,
-            easing: 'easeOutQuad',
-            complete: function() {
-              anime({
-                targets: fragment,
-                opacity: 0,
-                duration: 1000,
-                complete: function() {
-                  if (fragment.parentNode) {
-                    fragment.parentNode.removeChild(fragment);
-                  }
-                }
-              });
+        // 外星人类
+        class Alien {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.targetX = x;
+                this.targetY = y;
+                this.size = 60;
+                this.mood = 'curious';
+                this.energy = 100;
+                this.experience = 0;
+                this.behaviors = new Map();
+                this.lastGesture = null;
+                this.adaptationLevel = 0;
+                this.wingFlap = 0;
+                this.eyeBlinkTimer = 0;
+                this.survival = {
+                    threat_level: 0,
+                    comfort_zone: { x: width/2, y: height/2, radius: 100 },
+                    learned_responses: new Map()
+                };
             }
-          });
-        }
-      }, 600);
-    }
-    
-    // 创建stereotypeWords暗色效果
-    function createBottomSurgeEffect() {
-      setInterval(() => {
-        for (let i = 0; i < 15; i++) {
-          const fragment = document.createElement('div');
-          fragment.className = 'freedom-fragment dark-fragment dark-bottom-surge';
-          fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
-          
-          fragment.style.color = 'rgb(100, 100, 100)';
-          fragment.style.top = '100vh';
-          fragment.style.left = (Math.random() * 100) + 'vw';
-          fragment.style.opacity = '0';
-          document.body.appendChild(fragment);
-          
-          anime({
-            targets: fragment,
-            opacity: [0, 0.7],
-            translateY: [0, -150 - Math.random() * 250],
-            duration: 4000 + Math.random() * 3000,
-            easing: 'easeOutQuad',
-            complete: function() {
-              anime({
-                targets: fragment,
-                opacity: 0,
-                duration: 1000,
-                complete: function() {
-                  if (fragment.parentNode) {
-                    fragment.parentNode.removeChild(fragment);
-                  }
-                }
-              });
-            }
-          });
-        }
-      }, 400);
-    }
-    
-    function startContinuousTextGeneration() {
-      if (textGenerationInterval) clearInterval(textGenerationInterval);
-      
-      generationSpeed = 20;
-      totalTextsCreated = 0;
-      
-      textGenerationInterval = setInterval(() => {
-        generationSpeed += 1.5;
-        createBatchOfTexts(Math.floor(generationSpeed));
-        
-        if (totalTextsCreated > maxTexts) {
-          clearInterval(textGenerationInterval);
-          console.log("Text generation limit reached");
-        }
-      }, 80);
-    }
-    
-    // 生成一批文本
-    function createBatchOfTexts(count) {
-      for (let i = 0; i < count; i++) {
-        if (totalTextsCreated >= maxTexts) return;
-        
-        const isFreeTerm = Math.random() > 0.3;
-        
-        if (isFreeTerm) {
-          createSingleFreedomText();
-        } else {
-          createSingleFragmentText();
-        }
-        
-        totalTextsCreated++;
-      }
-    }
-    
-    // 创建单个自由词
-    function createSingleFreedomText() {
-      const clone = document.createElement('div');
-      clone.className = 'free-clone';
-      const word = freedomWords[Math.floor(Math.random() * freedomWords.length)];
-      clone.innerText = word;
-      
-      clone.style.fontSize = (Math.random() * 3 + 2) + 'rem';
-      clone.style.fontWeight = 'bold';
-      clone.style.top = Math.random() * 100 + 'vh';
-      clone.style.left = Math.random() * 100 + 'vw';
-      clone.style.transform = `rotate(${Math.random() * 360}deg)`;
-      clone.style.opacity = '0';
-      document.body.appendChild(clone);
-      
-      anime({
-        targets: clone,
-        opacity: [0, Math.random() * 0.3 + 0.7],
-        scale: [0.5, 1 + Math.random()],
-        duration: 1000,
-        easing: 'easeOutExpo'
-      });
-    }
-    
-    // 创建单个暗色文字
-    function createSingleFragmentText() {
-      const fragment = document.createElement('div');
-      fragment.className = 'freedom-fragment dark-fragment';
-      fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
-      
-      fragment.style.fontSize = (Math.random() * 2 + 1.2) + 'rem';
-      const darkness = 80 + Math.floor(Math.random() * 40);
-      fragment.style.color = `rgb(${darkness}, ${darkness}, ${darkness})`;
-      fragment.style.fontWeight = 'bold';
-      
-      if (Math.random() > 0.7) {
-        fragment.style.top = (Math.random() * 30 + 70) + 'vh';
-      } else {
-        fragment.style.top = (Math.random() * 70) + 'vh';
-      }
-      fragment.style.left = Math.random() * 100 + 'vw';
-      fragment.style.opacity = '0';
-      document.body.appendChild(fragment);
-      
-      anime({
-        targets: fragment,
-        opacity: [0, Math.random() * 0.7 + 0.3],
-        scale: [0, 1.2],
-        translateY: [
-          {value: -10 + Math.random() * 20, duration: 1000 + Math.random() * 2000},
-          {value: 10 + Math.random() * 20, duration: 1000 + Math.random() * 2000}
-        ],
-        direction: 'alternate',
-        loop: true,
-        duration: 1000,
-        easing: 'easeOutExpo'
-      });
-    }
-    
-    // 创建混沌效果
-    function createChaosEffect() {
-      chaosMode = true;
-      document.body.style.backgroundColor = "#FF3232";
-      
-      anime({
-        targets: 'body',
-        backgroundColor: ['#FF3232', '#B22222', '#FF0000', '#D70000'],
-        duration: 4000,
-        direction: 'alternate',
-        loop: true,
-        easing: 'easeInOutSine'
-      });
 
-      anime({
-        targets: '#main-text',
-        opacity: 0,
-        duration: 5000,
-        easing: 'easeInOutQuad'
-      });
-      
-      setTimeout(() => {
-        document.querySelector('.tv-scan-effect').style.opacity = '0.5';
-      }, 12000);
-      
-      // 启动两组文字效果
-      createBottomSurgeEffect(); // stereotypeWords暗色效果
-      createPowerWordsEffect();  // powerWords发光效果
-      
-      setTimeout(() => {
-        anime({
-          targets: '#enter-world-button',
-          opacity: 1,
-          translateY: [-20, 0],
-          duration: 2000,
-          easing: 'easeOutQuad'
-        });
-        
-        anime({
-          targets: '#enter-world-button',
-          textShadow: [
-            '0 0 8px rgba(255, 255, 255, 0.7)',
-            '0 0 12px rgba(255, 255, 255, 0.9)',
-            '0 0 8px rgba(255, 255, 255, 0.7)'
-          ],
-          duration: 2000,
-          direction: 'alternate',
-          loop: true,
-          easing: 'easeInOutSine'
-        });
-      }, 15000);
-      
-      startContinuousTextGeneration();
-      
-      setTimeout(() => {
-        canvas.style.opacity = 1;
-      }, 5000);
-    }
-    
-    // 创建初始文本片段 - 只使用stereotypeWords
-    function createTextFragments() {
-      const cols = 50;
-      const rows = 40;
-      const fragments = [];
-      
-      for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
-          const fragment = document.createElement('div');
-          fragment.className = 'freedom-fragment dark-fragment';
-          fragment.innerText = stereotypeWords[Math.floor(Math.random() * stereotypeWords.length)];
-          
-          fragment.style.fontSize = (Math.random() * 1.8 + 1) + 'rem';
-          const darkness = 80 + Math.floor(Math.random() * 40);
-          fragment.style.color = `rgb(${darkness}, ${darkness}, ${darkness})`;
-          fragment.style.fontWeight = 'bold';
-          
-          fragment.style.top = `${(i * 100 / rows) + Math.random() * 3}vh`;
-          fragment.style.left = `${(j * 100 / cols) + Math.random() * 3}vw`;
-          
-          document.body.appendChild(fragment);
-          fragments.push(fragment);
-        }
-      }
-      
-      anime({
-        targets: fragments,
-        opacity: [0, (el, i) => Math.random() * 0.8 + 0.4],
-        scale: [0, 1.2],
-        duration: 800,
-        delay: anime.stagger(1, {
-          grid: [cols, rows],
-          from: 'center'
-        }),
-        easing: 'easeOutExpo',
-        complete: function() {
-          setTimeout(() => {
-            anime({
-              targets: fragments,
-              translateY: 100,
-              opacity: 0,
-              duration: (el, i) => 7000 + Math.random() * 3000,
-              delay: anime.stagger(100, {from: 'top'}),
-              easing: 'easeInQuad'
-            });
-          }, 15000);
-        }
-      });
-    }
-    
-    // 初始化画布
-    function initCanvas() {
-      canvas = document.getElementById('chaos-canvas');
-      ctx = canvas.getContext('2d');
-      
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      canvas.style.opacity = 0;
-      canvas.style.position = 'fixed';
-      canvas.style.top = '0';
-      canvas.style.left = '0';
-      canvas.style.zIndex = '1';
-      
-      requestAnimationFrame(drawTVLines);
-    }
-    
-    // TV扫描线效果
-    let phase = 0;
-    let tvLineHeight = 6;
-    
-    function drawTVLines() {
-      if (!chaosMode) {
-        requestAnimationFrame(drawTVLines);
-        return;
-      }
-      
-      phase += 0.001;
-      ctx.fillStyle = 'rgba(178, 34, 34, 0.01)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      if (phase > 10) {
-        const scanLines = Math.floor(canvas.height / tvLineHeight);
-        
-        for (let i = 0; i < scanLines; i++) {
-          if (i % 3 === 0) {
-            const brightness = 200 + Math.random() * 55;
-            const yPos = i * tvLineHeight;
-            
-            ctx.fillStyle = `rgba(${brightness}, ${Math.floor(brightness/8)}, ${Math.floor(brightness/8)}, ${0.15 + Math.random() * 0.1})`;
-            ctx.fillRect(0, yPos, canvas.width, tvLineHeight / 2);
-            
-            if (Math.random() > 0.985) {
-              ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-              ctx.fillRect(0, Math.random() * (canvas.height * 0.7), canvas.width, 2 + Math.random() * 3);
-              
-              if (Math.random() > 0.7) {
-                ctx.fillStyle = 'rgba(255, 20, 20, 0.5)';
-                ctx.fillRect(0, Math.random() * (canvas.height * 0.6), canvas.width, 1 + Math.random() * 2);
-              }
-            }
-          }
-        }
-        
-        if (Math.random() > 0.95) {
-          for (let i = 0; i < 2; i++) {
-            const x = Math.random() * canvas.width;
-            const startY = Math.random() * (canvas.height * 0.3);
-            const length = 20 + Math.random() * 80;
-            
-            ctx.beginPath();
-            ctx.moveTo(x, startY);
-            
-            let currentY = startY;
-            let currentX = x;
-            
-            while (currentY < startY + length) {
-              currentY += 1 + Math.random() * 3;
-              currentX += Math.random() * 4 - 2;
-              ctx.lineTo(currentX, currentY);
-            }
-            
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.4)';
-            ctx.lineWidth = 1 + Math.random() * 2;
-            ctx.stroke();
-          }
-        }
-      }
-      
-      requestAnimationFrame(drawTVLines);
-    }
-    
-    // 窗口调整大小
-    window.addEventListener('resize', function() {
-      if (canvas) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-    });
-    
-    // 页面加载
-    window.onload = function() {
-      initCanvas();
-      
-      mainAnimation = anime.timeline()
-        .add({
-          targets: ['#ziwo', '#wo', '#fang', '#zhu'],
-          translateX: () => anime.random(-100, 100),
-          translateY: () => anime.random(-100, 100),
-          opacity: [1, 0],
-          delay: anime.stagger(200),
-          duration: 1200,
-          easing: 'easeInOutQuad'
-        })
-        .add({
-          targets: '#freedom',
-          opacity: [0, 1],
-          scale: [0.8, 1],
-          duration: 1000,
-          easing: 'easeOutBack',
-          begin: () => {
-            document.getElementById('freedom').style.display = 'flex';
-          }
-        })
-        .add({
-          duration: 500,
-          complete: () => {
-            // 创建第一波自由文本
-            function createInitialFreedomTexts(count) {
-              const fragments = [];
-              
-              for (let i = 0; i < count; i++) {
-                const clone = document.createElement('div');
-                clone.className = 'free-clone';
-                const word = freedomWords[Math.floor(Math.random() * freedomWords.length)];
-                clone.innerText = word;
+            update() {
+                // 平滑移动
+                this.x = lerp(this.x, this.targetX, 0.05);
+                this.y = lerp(this.y, this.targetY, 0.05);
                 
-                clone.style.fontSize = (Math.random() * 3 + 2) + 'rem';
-                clone.style.fontWeight = 'bold';
-                clone.style.top = Math.random() * 100 + 'vh';
-                clone.style.left = Math.random() * 100 + 'vw';
-                clone.style.transform = `rotate(${Math.random() * 360}deg)`;
-                document.body.appendChild(clone);
-                fragments.push(clone);
-              }
-              
-              anime({
-                targets: fragments,
-                opacity: [0, (el, i) => Math.random() * 0.3 + 0.7],
-                scale: [0.5, (el, i) => 1 + Math.random()],
-                duration: 500,
-                delay: anime.stagger(2, {from: 'center', start: 0}),
-                easing: 'easeOutExpo'
-              });
+                // 翅膀扇动
+                this.wingFlap += 0.2;
+                
+                // 眨眼动画
+                this.eyeBlinkTimer += 0.1;
+                
+                // 根据经验调整行为
+                this.adaptBehavior();
+                
+                // 生存机制更新
+                this.updateSurvival();
             }
+
+            adaptBehavior() {
+                if (this.experience > 50) {
+                    this.adaptationLevel = min(this.adaptationLevel + 0.1, 2);
+                }
+            }
+
+            updateSurvival() {
+                // 计算威胁等级
+                let distanceFromCenter = dist(this.x, this.y, width/2, height/2);
+                if (distanceFromCenter > 200) {
+                    this.survival.threat_level = min(this.survival.threat_level + 0.1, 1);
+                } else {
+                    this.survival.threat_level = max(this.survival.threat_level - 0.05, 0);
+                }
+                
+                // 根据威胁等级调整行为
+                if (this.survival.threat_level > 0.5) {
+                    this.mood = 'scared';
+                    this.returnToSafeZone();
+                }
+            }
+
+            returnToSafeZone() {
+                this.targetX = this.survival.comfort_zone.x;
+                this.targetY = this.survival.comfort_zone.y;
+            }
+
+            reactToGesture(gesture) {
+                if (!gesture) return;
+                
+                // 学习和记忆手势
+                if (isLearning) {
+                    this.learnGesture(gesture);
+                }
+                
+                // 根据学习到的行为做出反应
+                this.respondToGesture(gesture);
+            }
+
+            learnGesture(gesture) {
+                let gestureKey = this.classifyGesture(gesture);
+                
+                if (!this.behaviors.has(gestureKey)) {
+                    this.behaviors.set(gestureKey, {
+                        frequency: 1,
+                        responses: [],
+                        effectiveness: 0.5
+                    });
+                } else {
+                    let behavior = this.behaviors.get(gestureKey);
+                    behavior.frequency++;
+                    this.behaviors.set(gestureKey, behavior);
+                }
+                
+                this.experience++;
+                
+                // 保存到记忆库
+                memoryBank.push({
+                    timestamp: Date.now(),
+                    gesture: gestureKey,
+                    response: this.mood,
+                    effectiveness: this.behaviors.get(gestureKey).effectiveness
+                });
+                
+                // 限制记忆库大小
+                if (memoryBank.length > 100) {
+                    memoryBank.shift();
+                }
+            }
+
+            classifyGesture(gesture) {
+                // 简化的手势分类
+                let hand = gesture.landmarks;
+                let thumbTip = hand[4];
+                let indexTip = hand[8];
+                let middleTip = hand[12];
+                
+                // 计算手势特征
+                let fingersUp = 0;
+                if (thumbTip[1] < hand[3][1]) fingersUp++;
+                if (indexTip[1] < hand[6][1]) fingersUp++;
+                if (middleTip[1] < hand[10][1]) fingersUp++;
+                
+                if (fingersUp >= 3) return 'open_hand';
+                if (fingersUp === 1) return 'pointing';
+                if (fingersUp === 0) return 'fist';
+                return 'partial';
+            }
+
+            respondToGesture(gesture) {
+                let gestureType = this.classifyGesture(gesture);
+                let hand = gesture.landmarks[0]; // 手腕位置
+                
+                // 基于学习的反应
+                if (this.behaviors.has(gestureType)) {
+                    let behavior = this.behaviors.get(gestureType);
+                    
+                    switch(gestureType) {
+                        case 'open_hand':
+                            this.mood = 'happy';
+                            this.targetX = hand[0] - 50;
+                            this.targetY = hand[1] - 100;
+                            break;
+                        case 'fist':
+                            this.mood = 'scared';
+                            this.targetX = width - hand[0];
+                            this.targetY = height - hand[1];
+                            break;
+                        case 'pointing':
+                            this.mood = 'curious';
+                            this.targetX = hand[0];
+                            this.targetY = hand[1];
+                            break;
+                    }
+                    
+                    // 更新行为效果
+                    behavior.effectiveness = min(behavior.effectiveness + 0.1, 1.0);
+                } else {
+                    // 默认探索性反应
+                    this.mood = 'exploring';
+                    this.targetX = hand[0] + random(-50, 50);
+                    this.targetY = hand[1] + random(-50, 50);
+                }
+            }
+
+            draw() {
+                push();
+                translate(this.x, this.y);
+                
+                // 根据情绪调整颜色
+                let alienColor;
+                switch(this.mood) {
+                    case 'happy': alienColor = color(100, 255, 100); break;
+                    case 'scared': alienColor = color(255, 100, 100); break;
+                    case 'curious': alienColor = color(100, 255, 255); break;
+                    default: alienColor = color(150, 255, 150);
+                }
+                
+                fill(alienColor);
+                stroke(0);
+                strokeWeight(2);
+                
+                // 天使翅膀
+                fill(255, 255, 255, 180);
+                let wingOffset = sin(this.wingFlap) * 10;
+                ellipse(-40, -10 + wingOffset, 30, 60);
+                ellipse(40, -10 + wingOffset, 30, 60);
+                
+                // 身体
+                fill(alienColor);
+                ellipse(0, 0, this.size, this.size * 1.5);
+                
+                // 头部
+                ellipse(0, -this.size * 0.7, this.size * 0.8, this.size);
+                
+                // 眼睛
+                fill(0);
+                let eyeBlink = sin(this.eyeBlinkTimer) > 0.9 ? 5 : 15;
+                ellipse(-15, -this.size * 0.8, 20, eyeBlink);
+                ellipse(15, -this.size * 0.8, 20, eyeBlink);
+                
+                // 嘴巴 (根据情绪变化)
+                strokeWeight(2);
+                noFill();
+                if (this.mood === 'happy') {
+                    arc(0, -this.size * 0.6, 20, 10, 0, PI);
+                } else if (this.mood === 'scared') {
+                    arc(0, -this.size * 0.5, 15, 10, PI, TWO_PI);
+                } else {
+                    line(-5, -this.size * 0.55, 5, -this.size * 0.55);
+                }
+                
+                // 四肢
+                strokeWeight(3);
+                line(0, this.size * 0.3, -20, this.size * 0.8);
+                line(0, this.size * 0.3, 20, this.size * 0.8);
+                line(-this.size * 0.3, 0, -this.size * 0.6, this.size * 0.4);
+                line(this.size * 0.3, 0, this.size * 0.6, this.size * 0.4);
+                
+                pop();
+                
+                // 显示学习进度
+                this.drawLearningIndicator();
+            }
+
+            drawLearningIndicator() {
+                if (this.behaviors.size > 0) {
+                    push();
+                    translate(this.x, this.y - 80);
+                    fill(255, 200);
+                    textAlign(CENTER);
+                    textSize(12);
+                    text(`学习: ${this.behaviors.size} 种手势`, 0, 0);
+                    pop();
+                }
+            }
+        }
+
+        function setup() {
+            canvas = createCanvas(800, 600);
+            canvas.parent('container');
             
-            createInitialFreedomTexts(150);
+            // 初始化摄像头
+            video = createCapture(VIDEO);
+            video.size(320, 240);
+            video.hide();
             
-            // 文本抖动效果
-            const mainText = document.getElementById('main-text');
-            anime({
-              targets: mainText,
-              translateX: () => anime.random(-5, 5),
-              translateY: () => anime.random(-5, 5),
-              easing: 'easeInOutSine',
-              duration: 1000,
-              direction: 'alternate',
-              loop: 2
+            // 初始化手势识别
+            handpose = ml5.handpose(video, modelReady);
+            handpose.on('predict', results => {
+                predictions = results;
             });
             
-            // 8秒后进入混沌模式
-            setTimeout(createChaosEffect, 8000);
-          }
-        });
-    };
-  </script>
+            // 创建外星人
+            alien = new Alien(width/2, height/2);
+            
+            updateStatus('系统就绪');
+        }
+
+        function draw() {
+            // 背景
+            background(20, 30, 60);
+            
+            // 绘制星空
+            drawStars();
+            
+            // 显示摄像头画面 (小窗口)
+            push();
+            translate(width - 170, 10);
+            tint(255, 150);
+            image(video, 0, 0, 160, 120);
+            noTint();
+            pop();
+            
+            // 处理手势
+            if (predictions.length > 0) {
+                let hand = predictions[0];
+                alien.reactToGesture(hand);
+                drawHandPoints(hand);
+            }
+            
+            // 更新和绘制外星人
+            alien.update();
+            alien.draw();
+            
+            // 更新UI
+            updateUI();
+        }
+
+        function drawStars() {
+            fill(255, 200);
+            noStroke();
+            for (let i = 0; i < 50; i++) {
+                let x = (noise(i * 0.1, frameCount * 0.01) * width);
+                let y = (noise(i * 0.2, frameCount * 0.01) * height);
+                let size = noise(i * 0.3) * 3;
+                ellipse(x, y, size, size);
+            }
+        }
+
+        function drawHandPoints(hand) {
+            stroke(255, 100, 100);
+            strokeWeight(3);
+            noFill();
+            
+            // 绘制手的轮廓
+            beginShape();
+            for (let point of hand.landmarks) {
+                vertex(point[0], point[1]);
+            }
+            endShape();
+        }
+
+        function modelReady() {
+            updateStatus('手势识别已就绪');
+        }
+
+        function updateStatus(text) {
+            document.getElementById('statusText').textContent = text;
+        }
+
+        function updateUI() {
+            document.getElementById('moodText').textContent = alien.mood;
+            document.getElementById('learningText').textContent = 
+                Math.round((alien.experience / 100) * 100) + '%';
+        }
+
+        function resetAlien() {
+            alien = new Alien(width/2, height/2);
+            memoryBank = [];
+            updateStatus('外星人已重置');
+        }
+
+        function toggleLearning() {
+            isLearning = !isLearning;
+            updateStatus(isLearning ? '学习模式开启' : '学习模式关闭');
+        }
+
+        function showMemory() {
+            let memoryDiv = document.getElementById('memory');
+            let contentDiv = document.getElementById('memoryContent');
+            
+            if (memoryDiv.style.display === 'none') {
+                let memoryText = '';
+                memoryBank.slice(-10).forEach((memory, i) => {
+                    memoryText += `<p>${i+1}. 手势: ${memory.gesture} → 反应: ${memory.response} (效果: ${Math.round(memory.effectiveness * 100)}%)</p>`;
+                });
+                contentDiv.innerHTML = memoryText || '<p>暂无记忆数据</p>';
+                memoryDiv.style.display = 'block';
+            } else {
+                memoryDiv.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
+
