@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>systeme_for_interaction_of_alien_creature</title>
+    <title>外星人情感交互系统</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ml5/0.12.2/ml5.min.js"></script>
     <style>
         body {
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
             font-family: 'Arial', sans-serif;
-            color:white;
+            color: white;
+            overflow-x: hidden;
         }
         #container {
             display: flex;
@@ -21,27 +22,68 @@
         }
         #status {
             margin: 10px;
-            padding: 10px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
             text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
         #controls {
             margin: 10px;
             display: flex;
-            gap: 10px;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         button {
-            padding: 10px 20px;
-            background: #4CAF50;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 14px;         
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         button:hover {
-            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        #intimacy-bar {
+            width: 300px;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        #intimacy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #ffffff);
+            width: 50%;
+            transition: all 0.5s ease;
+            border-radius: 10px;
+        }
+        #emotion-display {
+            margin: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            min-height: 80px;
+            backdrop-filter: blur(5px);
+        }
+        .emotion-item {
+            margin: 5px 0;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
         }
         #memory {
             margin-top: 10px;
@@ -49,317 +91,484 @@
             background: rgba(0,0,0,0.4);
             border-radius: 10px;
             max-width: 600px;
+            backdrop-filter: blur(10px);
         }
     </style>
 </head>
 <body>
     <div id="container">
-        <h1>🛸 智能外星人互动系统</h1>
+        <h1>🛸 外星人情感交互系统</h1>
         <div id="status">
             <div>状态: <span id="statusText">初始化中...</span></div>
-            <div>情绪: <span id="moodText">好奇</span></div>
-            <div>学习进度: <span id="learningText">0%</span></div>
+            <div>当前情绪: <span id="currentEmotion">中性</span></div>
+            <div>亲密度: <span id="intimacyText">50%</span></div>
+            <div id="intimacy-bar">
+                <div id="intimacy-fill"></div>
+            </div>
         </div>
+        
         <div id="controls">
             <button onclick="resetAlien()">重置外星人</button>
-            <button onclick="toggleLearning()">切换学习模式</button>
+            <button onclick="toggleEmotionDetection()">切换情感检测</button>
             <button onclick="showMemory()">显示记忆</button>
+            <button onclick="calibrateSystem()">校准系统</button>
         </div>
+        
+        <div id="emotion-display">
+            <h4>检测到的情绪:</h4>
+            <div id="emotionList"></div>
+        </div>
+        
         <div id="memory" style="display:none;">
-            <h3>外星人的记忆库:</h3>
+            <h3>外星人的情感记忆:</h3>
             <div id="memoryContent"></div>
         </div>
     </div>
 
     <script>
         let video;
-        let handpose;
-        let predictions = [];
+        let faceapi;
+        let detections = [];
         let alien;
-        let isLearning = true;
+        let isEmotionDetection = true;
         let memoryBank = [];
         let canvas;
+        let stars = [];
 
         // 外星人类
-        class Alien {
+        class EmotionalAlien {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
                 this.targetX = x;
                 this.targetY = y;
-                this.size = 60;
-                this.mood = 'curious';
-                this.energy = 100;
-                this.experience = 0;
-                this.behaviors = new Map();
-                this.lastGesture = null;
-                this.adaptationLevel = 0;
+                this.baseSize = 80;
+                this.currentSize = this.baseSize;
+                this.intimacy = 0.5; // 0-1 亲密度
+                this.currentEmotion = 'neutral';
+                this.emotionHistory = [];
                 this.wingFlap = 0;
                 this.eyeBlinkTimer = 0;
-                this.survival = {
-                    threat_level: 0,
-                    comfort_zone: { x: width/2, y: height/2, radius: 100 },
-                    learned_responses: new Map()
+                this.glowIntensity = 0;
+                this.pulsePhase = 0;
+                this.emotionWeights = {
+                    happy: 0.3,
+                    sad: -0.2,
+                    angry: -0.4,
+                    surprised: 0.1,
+                    neutral: 0.0,
+                    fearful: -0.3,
+                    disgusted: -0.25
                 };
+                this.bodyColor = color(150, 255, 150);
+                this.targetBodyColor = color(150, 255, 150);
+                this.haloRadius = 0;
+                this.particleSystem = [];
             }
 
             update() {
                 // 平滑移动
-                this.x = lerp(this.x, this.targetX, 0.05);
-                this.y = lerp(this.y, this.targetY, 0.05);
+                this.x = lerp(this.x, this.targetX, 0.03);
+                this.y = lerp(this.y, this.targetY, 0.03);
                 
-                // 翅膀扇动
-                this.wingFlap += 0.2;
-                
-                // 眨眼动画
+                // 动画更新
+                this.wingFlap += 0.15;
                 this.eyeBlinkTimer += 0.1;
+                this.pulsePhase += 0.08;
                 
-                // 根据经验调整行为
-                this.adaptBehavior();
+                // 根据亲密度调整外观
+                this.updateAppearanceBasedOnIntimacy();
                 
-                // 生存机制更新
-                this.updateSurvival();
+                // 更新粒子系统
+                this.updateParticles();
+                
+                // 颜色渐变
+                this.bodyColor = lerpColor(this.bodyColor, this.targetBodyColor, 0.05);
             }
 
-            adaptBehavior() {
-                if (this.experience > 50) {
-                    this.adaptationLevel = min(this.adaptationLevel + 0.1, 2);
+            updateAppearanceBasedOnIntimacy() {
+                // 根据亲密度调整发光强度
+                this.glowIntensity = this.intimacy * 255;
+                
+                // 根据亲密度调整光环大小
+                this.haloRadius = this.intimacy * 120;
+                
+                // 根据亲密度调整颜色（越亲密越白）
+                let r = lerp(100, 255, this.intimacy);
+                let g = lerp(255, 255, this.intimacy);
+                let b = lerp(100, 255, this.intimacy);
+                this.targetBodyColor = color(r, g, b);
+                
+                // 根据亲密度调整大小
+                this.currentSize = this.baseSize + (this.intimacy * 20);
+                
+                // 高亲密度时产生粒子
+                if (this.intimacy > 0.7 && random() < 0.1) {
+                    this.createParticle();
                 }
             }
 
-            updateSurvival() {
-                // 计算威胁等级
-                let distanceFromCenter = dist(this.x, this.y, width/2, height/2);
-                if (distanceFromCenter > 200) {
-                    this.survival.threat_level = min(this.survival.threat_level + 0.1, 1);
-                } else {
-                    this.survival.threat_level = max(this.survival.threat_level - 0.05, 0);
-                }
-                
-                // 根据威胁等级调整行为
-                if (this.survival.threat_level > 0.5) {
-                    this.mood = 'scared';
-                    this.returnToSafeZone();
+            createParticle() {
+                this.particleSystem.push({
+                    x: this.x + random(-30, 30),
+                    y: this.y + random(-40, 40),
+                    vx: random(-1, 1),
+                    vy: random(-2, -0.5),
+                    life: 255,
+                    size: random(2, 6)
+                });
+            }
+
+            updateParticles() {
+                for (let i = this.particleSystem.length - 1; i >= 0; i--) {
+                    let p = this.particleSystem[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 3;
+                    p.size *= 0.98;
+                    
+                    if (p.life <= 0) {
+                        this.particleSystem.splice(i, 1);
+                    }
                 }
             }
 
-            returnToSafeZone() {
-                this.targetX = this.survival.comfort_zone.x;
-                this.targetY = this.survival.comfort_zone.y;
-            }
-
-            reactToGesture(gesture) {
-                if (!gesture) return;
+            processEmotion(emotions) {
+                if (!emotions || emotions.length === 0) return;
                 
-                // 学习和记忆手势
-                if (isLearning) {
-                    this.learnGesture(gesture);
+                // 找到最强烈的情绪
+                let dominantEmotion = 'neutral';
+                let maxScore = 0;
+                
+                for (let [emotion, score] of Object.entries(emotions)) {
+                    if (score > maxScore) {
+                        maxScore = score;
+                        dominantEmotion = emotion;
+                    }
                 }
                 
-                // 根据学习到的行为做出反应
-                this.respondToGesture(gesture);
-            }
-
-            learnGesture(gesture) {
-                let gestureKey = this.classifyGesture(gesture);
+                this.currentEmotion = dominantEmotion;
                 
-                if (!this.behaviors.has(gestureKey)) {
-                    this.behaviors.set(gestureKey, {
-                        frequency: 1,
-                        responses: [],
-                        effectiveness: 0.5
-                    });
-                } else {
-                    let behavior = this.behaviors.get(gestureKey);
-                    behavior.frequency++;
-                    this.behaviors.set(gestureKey, behavior);
+                // 根据情绪调整亲密度
+                if (this.emotionWeights[dominantEmotion] !== undefined) {
+                    let emotionImpact = this.emotionWeights[dominantEmotion] * maxScore * 0.02;
+                    this.intimacy = constrain(this.intimacy + emotionImpact, 0, 1);
                 }
                 
-                this.experience++;
+                // 记录情绪历史
+                this.emotionHistory.push({
+                    emotion: dominantEmotion,
+                    score: maxScore,
+                    timestamp: Date.now(),
+                    intimacyChange: this.emotionWeights[dominantEmotion] * maxScore * 0.02
+                });
                 
                 // 保存到记忆库
                 memoryBank.push({
                     timestamp: Date.now(),
-                    gesture: gestureKey,
-                    response: this.mood,
-                    effectiveness: this.behaviors.get(gestureKey).effectiveness
+                    emotion: dominantEmotion,
+                    score: maxScore,
+                    intimacy: this.intimacy,
+                    response: this.getEmotionalResponse(dominantEmotion)
                 });
                 
-                // 限制记忆库大小
-                if (memoryBank.length > 100) {
+                // 限制记忆大小
+                if (memoryBank.length > 50) {
                     memoryBank.shift();
                 }
+                
+                // 根据情绪调整位置
+                this.reactToEmotion(dominantEmotion, maxScore);
             }
 
-            classifyGesture(gesture) {
-                // 简化的手势分类
-                let hand = gesture.landmarks;
-                let thumbTip = hand[4];
-                let indexTip = hand[8];
-                let middleTip = hand[12];
-                
-                // 计算手势特征
-                let fingersUp = 0;
-                if (thumbTip[1] < hand[3][1]) fingersUp++;
-                if (indexTip[1] < hand[6][1]) fingersUp++;
-                if (middleTip[1] < hand[10][1]) fingersUp++;
-                
-                if (fingersUp >= 3) return 'open_hand';
-                if (fingersUp === 1) return 'pointing';
-                if (fingersUp === 0) return 'fist';
-                return 'partial';
+            getEmotionalResponse(emotion) {
+                const responses = {
+                    happy: '欢喜雀跃',
+                    sad: '同情安慰',
+                    angry: '小心谨慎',
+                    surprised: '好奇探索',
+                    neutral: '平静观察',
+                    fearful: '温柔安抚',
+                    disgusted: '保持距离'
+                };
+                return responses[emotion] || '困惑观察';
             }
 
-            respondToGesture(gesture) {
-                let gestureType = this.classifyGesture(gesture);
-                let hand = gesture.landmarks[0]; // 手腕位置
+            reactToEmotion(emotion, intensity) {
+                let moveRange = intensity * 50;
                 
-                // 基于学习的反应
-                if (this.behaviors.has(gestureType)) {
-                    let behavior = this.behaviors.get(gestureType);
-                    
-                    switch(gestureType) {
-                        case 'open_hand':
-                            this.mood = 'happy';
-                            this.targetX = hand[0] - 50;
-                            this.targetY = hand[1] - 100;
-                            break;
-                        case 'fist':
-                            this.mood = 'scared';
-                            this.targetX = width - hand[0];
-                            this.targetY = height - hand[1];
-                            break;
-                        case 'pointing':
-                            this.mood = 'curious';
-                            this.targetX = hand[0];
-                            this.targetY = hand[1];
-                            break;
-                    }
-                    
-                    // 更新行为效果
-                    behavior.effectiveness = min(behavior.effectiveness + 0.1, 1.0);
-                } else {
-                    // 默认探索性反应
-                    this.mood = 'exploring';
-                    this.targetX = hand[0] + random(-50, 50);
-                    this.targetY = hand[1] + random(-50, 50);
+                switch(emotion) {
+                    case 'happy':
+                        this.targetY = height/2 - moveRange;
+                        break;
+                    case 'sad':
+                        this.targetY = height/2 + moveRange/2;
+                        break;
+                    case 'angry':
+                        this.targetX = width/2 + moveRange;
+                        break;
+                    case 'surprised':
+                        this.currentSize = this.baseSize + moveRange/2;
+                        break;
+                    case 'fearful':
+                        this.targetX = width/2 - moveRange;
+                        break;
                 }
+                
+                // 确保外星人不会移出画布
+                this.targetX = constrain(this.targetX, 100, width - 100);
+                this.targetY = constrain(this.targetY, 100, height - 100);
             }
 
             draw() {
                 push();
+                
+                // 绘制光环（高亲密度时）
+                if (this.intimacy > 0.3) {
+                    this.drawHalo();
+                }
+                
+                // 绘制粒子
+                this.drawParticles();
+                
                 translate(this.x, this.y);
                 
-                // 根据情绪调整颜色
-                let alienColor;
-                switch(this.mood) {
-                    case 'happy': alienColor = color(100, 255, 100); break;
-                    case 'scared': alienColor = color(255, 100, 100); break;
-                    case 'curious': alienColor = color(100, 255, 255); break;
-                    default: alienColor = color(150, 255, 150);
+                // 发光效果
+                if (this.glowIntensity > 0) {
+                    drawingContext.shadowColor = `rgba(255, 255, 255, ${this.glowIntensity/255 * 0.8})`;
+                    drawingContext.shadowBlur = this.glowIntensity / 5;
                 }
                 
-                fill(alienColor);
-                stroke(0);
-                strokeWeight(2);
-                
-                // 天使翅膀
-                fill(255, 255, 255, 180);
-                let wingOffset = sin(this.wingFlap) * 10;
-                ellipse(-40, -10 + wingOffset, 30, 60);
-                ellipse(40, -10 + wingOffset, 30, 60);
+                // 天使翅膀（更加华丽）
+                this.drawWings();
                 
                 // 身体
-                fill(alienColor);
-                ellipse(0, 0, this.size, this.size * 1.5);
+                fill(this.bodyColor);
+                stroke(255, this.glowIntensity);
+                strokeWeight(2);
+                ellipse(0, 0, this.currentSize, this.currentSize * 1.5);
                 
                 // 头部
-                ellipse(0, -this.size * 0.7, this.size * 0.8, this.size);
+                ellipse(0, -this.currentSize * 0.7, this.currentSize * 0.8, this.currentSize);
                 
-                // 眼睛
-                fill(0);
-                let eyeBlink = sin(this.eyeBlinkTimer) > 0.9 ? 5 : 15;
-                ellipse(-15, -this.size * 0.8, 20, eyeBlink);
-                ellipse(15, -this.size * 0.8, 20, eyeBlink);
+                // 眼睛（根据情绪变化）
+                this.drawEyes();
                 
-                // 嘴巴 (根据情绪变化)
-                strokeWeight(2);
-                noFill();
-                if (this.mood === 'happy') {
-                    arc(0, -this.size * 0.6, 20, 10, 0, PI);
-                } else if (this.mood === 'scared') {
-                    arc(0, -this.size * 0.5, 15, 10, PI, TWO_PI);
-                } else {
-                    line(-5, -this.size * 0.55, 5, -this.size * 0.55);
-                }
+                // 嘴巴（根据当前情绪）
+                this.drawMouth();
                 
                 // 四肢
-                strokeWeight(3);
-                line(0, this.size * 0.3, -20, this.size * 0.8);
-                line(0, this.size * 0.3, 20, this.size * 0.8);
-                line(-this.size * 0.3, 0, -this.size * 0.6, this.size * 0.4);
-                line(this.size * 0.3, 0, this.size * 0.6, this.size * 0.4);
+                this.drawLimbs();
+                
+                // 重置阴影
+                drawingContext.shadowBlur = 0;
                 
                 pop();
                 
-                // 显示学习进度
-                this.drawLearningIndicator();
+                // 显示状态信息
+                this.drawStatusInfo();
             }
 
-            drawLearningIndicator() {
-                if (this.behaviors.size > 0) {
-                    push();
-                    translate(this.x, this.y - 80);
-                    fill(255, 200);
-                    textAlign(CENTER);
-                    textSize(12);
-                    text(`学习: ${this.behaviors.size} 种手势`, 0, 0);
-                    pop();
+            drawHalo() {
+                push();
+                translate(this.x, this.y - this.currentSize);
+                noFill();
+                stroke(255, 255, 255, this.intimacy * 200);
+                strokeWeight(3);
+                let pulseSize = this.haloRadius + sin(this.pulsePhase) * 10;
+                ellipse(0, 0, pulseSize, pulseSize * 0.3);
+                
+                // 内圈光环
+                stroke(255, 255, 255, this.intimacy * 100);
+                strokeWeight(1);
+                ellipse(0, 0, pulseSize * 0.7, pulseSize * 0.7 * 0.3);
+                pop();
+            }
+
+            drawParticles() {
+                noStroke();
+                for (let p of this.particleSystem) {
+                    fill(255, 255, 255, p.life);
+                    ellipse(p.x, p.y, p.size, p.size);
                 }
+            }
+
+            drawWings() {
+                fill(255, 255, 255, 180 + this.intimacy * 75);
+                stroke(255, this.glowIntensity);
+                strokeWeight(1);
+                
+                let wingOffset = sin(this.wingFlap) * 15;
+                let wingSize = 1 + this.intimacy * 0.5;
+                
+                // 左翅膀
+                push();
+                translate(-50, -10 + wingOffset);
+                scale(wingSize);
+                beginShape();
+                vertex(0, 0);
+                bezierVertex(-20, -30, -40, -20, -30, 10);
+                bezierVertex(-35, 30, -15, 35, 0, 20);
+                endShape(CLOSE);
+                pop();
+                
+                // 右翅膀
+                push();
+                translate(50, -10 + wingOffset);
+                scale(wingSize);
+                beginShape();
+                vertex(0, 0);
+                bezierVertex(20, -30, 40, -20, 30, 10);
+                bezierVertex(35, 30, 15, 35, 0, 20);
+                endShape(CLOSE);
+                pop();
+            }
+
+            drawEyes() {
+                fill(0);
+                let eyeSize = 20;
+                let eyeBlink = sin(this.eyeBlinkTimer) > 0.95 ? 3 : eyeSize;
+                
+                // 根据情绪调整眼睛
+                if (this.currentEmotion === 'happy') {
+                    // 开心时眼睛弯成月牙
+                    noFill();
+                    stroke(0);
+                    strokeWeight(3);
+                    arc(-15, -this.currentSize * 0.8, 25, 15, 0, PI);
+                    arc(15, -this.currentSize * 0.8, 25, 15, 0, PI);
+                } else if (this.currentEmotion === 'surprised') {
+                    // 惊讶时眼睛变圆
+                    fill(0);
+                    ellipse(-15, -this.currentSize * 0.8, eyeSize * 1.5, eyeBlink * 1.5);
+                    ellipse(15, -this.currentSize * 0.8, eyeSize * 1.5, eyeBlink * 1.5);
+                } else {
+                    // 正常眼睛
+                    ellipse(-15, -this.currentSize * 0.8, eyeSize, eyeBlink);
+                    ellipse(15, -this.currentSize * 0.8, eyeSize, eyeBlink);
+                }
+                
+                // 眼中的光点（亲密度高时更亮）
+                if (this.intimacy > 0.3) {
+                    fill(255, this.intimacy * 255);
+                    ellipse(-12, -this.currentSize * 0.85, 6, 6);
+                    ellipse(18, -this.currentSize * 0.85, 6, 6);
+                }
+            }
+
+            drawMouth() {
+                strokeWeight(2);
+                noFill();
+                stroke(0);
+                
+                switch(this.currentEmotion) {
+                    case 'happy':
+                        arc(0, -this.currentSize * 0.6, 30, 20, 0, PI);
+                        break;
+                    case 'sad':
+                        arc(0, -this.currentSize * 0.5, 25, 15, PI, TWO_PI);
+                        break;
+                    case 'surprised':
+                        ellipse(0, -this.currentSize * 0.6, 15, 20);
+                        break;
+                    case 'angry':
+                        line(-10, -this.currentSize * 0.55, 10, -this.currentSize * 0.65);
+                        break;
+                    default:
+                        line(-8, -this.currentSize * 0.55, 8, -this.currentSize * 0.55);
+                }
+            }
+
+            drawLimbs() {
+                strokeWeight(4);
+                stroke(red(this.bodyColor), green(this.bodyColor), blue(this.bodyColor));
+                
+                // 腿部
+                line(0, this.currentSize * 0.4, -25, this.currentSize * 0.9);
+                line(0, this.currentSize * 0.4, 25, this.currentSize * 0.9);
+                
+                // 手臂
+                line(-this.currentSize * 0.35, 0, -this.currentSize * 0.65, this.currentSize * 0.5);
+                line(this.currentSize * 0.35, 0, this.currentSize * 0.65, this.currentSize * 0.5);
+            }
+
+            drawStatusInfo() {
+                push();
+                translate(this.x, this.y - this.currentSize - 40);
+                fill(255, 200);
+                textAlign(CENTER);
+                textSize(14);
+                text(`${this.getEmotionalResponse(this.currentEmotion)}`, 0, 0);
+                
+                // 亲密度指示器
+                textSize(12);
+                fill(255, 255, 255, this.intimacy * 255);
+                text(`亲密度: ${Math.round(this.intimacy * 100)}%`, 0, -20);
+                pop();
             }
         }
 
         function setup() {
-            canvas = createCanvas(800, 600);
+            canvas = createCanvas(1000, 700);
             canvas.parent('container');
+            
+            // 初始化星空
+            for (let i = 0; i < 100; i++) {
+                stars.push({
+                    x: random(width),
+                    y: random(height),
+                    size: random(1, 3),
+                    brightness: random(100, 255),
+                    twinkle: random(TWO_PI)
+                });
+            }
             
             // 初始化摄像头
             video = createCapture(VIDEO);
             video.size(320, 240);
             video.hide();
             
-            // 初始化手势识别
-            handpose = ml5.handpose(video, modelReady);
-            handpose.on('predict', results => {
-                predictions = results;
-            });
+            // 初始化面部情绪识别
+            const options = {
+                withLandmarks: true,
+                withDescriptors: false,
+                minConfidence: 0.5
+            };
+            
+            faceapi = ml5.faceApi(video, options, modelReady);
             
             // 创建外星人
-            alien = new Alien(width/2, height/2);
+            alien = new EmotionalAlien(width/2, height/2);
             
-            updateStatus('系统就绪');
+            updateStatus('系统初始化中...');
         }
 
         function draw() {
-            // 背景
-            background(20, 30, 60);
+            // 动态背景
+            drawDynamicBackground();
             
             // 绘制星空
             drawStars();
             
-            // 显示摄像头画面 (小窗口)
+            // 显示摄像头画面
             push();
-            translate(width - 170, 10);
-            tint(255, 150);
+            translate(width - 180, 20);
+            tint(255, 180);
             image(video, 0, 0, 160, 120);
+            stroke(255);
+            strokeWeight(2);
+            noFill();
+            rect(-1, -1, 162, 122);
             noTint();
             pop();
             
-            // 处理手势
-            if (predictions.length > 0) {
-                let hand = predictions[0];
-                alien.reactToGesture(hand);
-                drawHandPoints(hand);
+            // 处理面部检测
+            if (detections.length > 0) {
+                let face = detections[0];
+                if (face.expressions) {
+                    alien.processEmotion(face.expressions);
+                    displayEmotions(face.expressions);
+                }
             }
             
             // 更新和绘制外星人
@@ -370,32 +579,65 @@
             updateUI();
         }
 
-        function drawStars() {
-            fill(255, 200);
-            noStroke();
-            for (let i = 0; i < 50; i++) {
-                let x = (noise(i * 0.1, frameCount * 0.01) * width);
-                let y = (noise(i * 0.2, frameCount * 0.01) * height);
-                let size = noise(i * 0.3) * 3;
-                ellipse(x, y, size, size);
+        function drawDynamicBackground() {
+            // 根据亲密度改变背景色调
+            let intimacyLevel = alien ? alien.intimacy : 0.5;
+            let bgR = lerp(10, 30, intimacyLevel);
+            let bgG = lerp(10, 30, intimacyLevel);
+            let bgB = lerp(30, 60, intimacyLevel);
+            
+            background(bgR, bgG, bgB);
+            
+            // 渐变效果
+            if (alien && alien.intimacy > 0.5) {
+                let alpha = (alien.intimacy - 0.5) * 100;
+                fill(255, 255, 255, alpha);
+                noStroke();
+                ellipse(alien.x, alien.y, 400, 400);
             }
         }
 
-        function drawHandPoints(hand) {
-            stroke(255, 100, 100);
-            strokeWeight(3);
-            noFill();
-            
-            // 绘制手的轮廓
-            beginShape();
-            for (let point of hand.landmarks) {
-                vertex(point[0], point[1]);
+        function drawStars() {
+            for (let star of stars) {
+                star.twinkle += 0.05;
+                let brightness = star.brightness + sin(star.twinkle) * 50;
+                fill(255, brightness);
+                noStroke();
+                ellipse(star.x, star.y, star.size, star.size);
             }
-            endShape();
         }
 
         function modelReady() {
-            updateStatus('手势识别已就绪');
+            updateStatus('面部情绪识别已就绪');
+            faceapi.detect(gotResults);
+        }
+
+        function gotResults(err, result) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            detections = result;
+            faceapi.detect(gotResults);
+        }
+
+        function displayEmotions(emotions) {
+            let emotionList = document.getElementById('emotionList');
+            let html = '';
+            
+            for (let [emotion, score] of Object.entries(emotions)) {
+                let percentage = Math.round(score * 100);
+                let barWidth = percentage;
+                html += `
+                    <div class="emotion-item">
+                        <span>${emotion}</span>
+                        <span>${percentage}%</span>
+                        <div style="width: ${barWidth}px; height: 10px; background: linear-gradient(90deg, #667eea, #764ba2); margin-left: 10px; border-radius: 5px;"></div>
+                    </div>
+                `;
+            }
+            
+            emotionList.innerHTML = html;
         }
 
         function updateStatus(text) {
@@ -403,20 +645,28 @@
         }
 
         function updateUI() {
-            document.getElementById('moodText').textContent = alien.mood;
-            document.getElementById('learningText').textContent = 
-                Math.round((alien.experience / 100) * 100) + '%';
+            if (alien) {
+                document.getElementById('currentEmotion').textContent = alien.currentEmotion;
+                document.getElementById('intimacyText').textContent = Math.round(alien.intimacy * 100) + '%';
+                
+                let intimacyFill = document.getElementById('intimacy-fill');
+                intimacyFill.style.width = (alien.intimacy * 100) + '%';
+                
+                // 根据亲密度调整填充颜色
+                let hue = alien.intimacy * 60; // 从红色到白色
+                intimacyFill.style.background = `hsl(${hue}, 70%, ${50 + alien.intimacy * 30}%)`;
+            }
         }
 
         function resetAlien() {
-            alien = new Alien(width/2, height/2);
+            alien = new EmotionalAlien(width/2, height/2);
             memoryBank = [];
             updateStatus('外星人已重置');
         }
 
-        function toggleLearning() {
-            isLearning = !isLearning;
-            updateStatus(isLearning ? '学习模式开启' : '学习模式关闭');
+        function toggleEmotionDetection() {
+            isEmotionDetection = !isEmotionDetection;
+            updateStatus(isEmotionDetection ? '情感检测开启' : '情感检测关闭');
         }
 
         function showMemory() {
@@ -425,16 +675,32 @@
             
             if (memoryDiv.style.display === 'none') {
                 let memoryText = '';
-                memoryBank.slice(-10).forEach((memory, i) => {
-                    memoryText += `<p>${i+1}. 手势: ${memory.gesture} → 反应: ${memory.response} (效果: ${Math.round(memory.effectiveness * 100)}%)</p>`;
+                memoryBank.slice(-15).forEach((memory, i) => {
+                    let time = new Date(memory.timestamp).toLocaleTimeString();
+                    memoryText += `
+                        <p>
+                            <strong>${i+1}.</strong> ${time} - 
+                            情绪: <em>${memory.emotion}</em> (${Math.round(memory.score * 100)}%) → 
+                            反应: <strong>${memory.response}</strong> | 
+                            亲密度: ${Math.round(memory.intimacy * 100)}%
+                        </p>
+                    `;
                 });
-                contentDiv.innerHTML = memoryText || '<p>暂无记忆数据</p>';
+                contentDiv.innerHTML = memoryText || '<p>暂无情感记忆数据</p>';
                 memoryDiv.style.display = 'block';
             } else {
                 memoryDiv.style.display = 'none';
             }
         }
+
+        function calibrateSystem() {
+            // 校准系统，重置某些参数
+            if (alien) {
+                alien.intimacy = 0.5;
+                alien.emotionHistory = [];
+            }
+            updateStatus('系统已校准');
+        }
     </script>
 </body>
 </html>
-
